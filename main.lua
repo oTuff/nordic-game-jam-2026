@@ -5,6 +5,7 @@ local player = require("src.models.player")
 local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
+local particles = require("src.models.particles")
 
 local main_menu = require("src.screens.main_menu")
 local pause_menu = require("src.screens.pause_menu")
@@ -196,11 +197,14 @@ function love.update(dt)
 
 	for index, obj in ipairs(Game.unlocks) do
 		if physics.CheckCollosion(p, obj) then
+			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, particles.Effects.explosion)
 			table.remove(Game.unlocks, index)
 			UnlockedColor[obj.col] = true
 			print("col " .. p.body.x .. " " .. p.body.y)
 		end
 	end
+
+	particles:update(dt)
 
 	-- Camera
 	local cam = Game.camera
@@ -263,6 +267,8 @@ function love.draw()
 				love.graphics.draw(obj.sprite, obj.x, obj.y)
 			end
 		end
+
+		particles:draw()
 
 		love.graphics.pop()
 
