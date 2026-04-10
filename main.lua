@@ -14,9 +14,14 @@ local credits = require("src.screens.credits")
 ---@class Object
 ---@field x integer
 ---@field y integer
----@field color number[]
----@field update function?
 ---@field col string
+
+---@class Entity:Object
+---@field sprite love.Image
+---@field update function?
+
+---@class Unlocks:Object
+---@field color number[]
 function love.load()
 	--[[ Constants(not supposed to change): denoted with CAPITALIZED snake_case ]]
 	TILE_SIZE = 32
@@ -130,19 +135,15 @@ function love.load()
 
 	Game.camera = { x = 0, y = 0 }
 	Game.player = player.new(100, 100)
-	--- @type Object[]
-	Game.objects = {
+	--- @type Unlocks[]
+	Game.unlocks = {
 		{ col = "red",   x = 300, y = 300, color = { 1, 0, 0, 1 } }, -- red 1
 		{ col = "green", x = 500, y = 200, color = { 0, 1, 0, 1 } }, -- green 2
 		{ col = "blue",  x = 100, y = 800, color = { 0, 0, 1, 1 } } -- blue 3
-		-- Static game objects
-		-- { x = 300, y = 300, sprite = Game.assets.images.test },
-		-- { x = 350, y = 400, sprite = Game.assets.images.test },
-
-		-- Enemies
-		-- enemy.new(400, 100),
-		-- enemy.new(500, 250),
-		-- enemy.new(600, 600),
+	}
+	--- @type Entity[]
+	Game.objects = {
+		{ col = "red", x = 300, y = 300, sprite = Game.assets.images.test }
 	}
 end
 
@@ -191,17 +192,15 @@ function love.update(dt)
 		print(index .. tostring(value))
 	end
 
-	for index, obj in ipairs(Game.objects) do
+	for index, obj in ipairs(Game.unlocks) do
 		if physics.CheckCollosion(p, obj) then
-			table.remove(Game.objects, index)
+			table.remove(Game.unlocks, index)
 			UnlockedColor[obj.col] = true
 			print("col " .. p.body.x .. " " .. p.body.y)
 		end
-
-		if obj.update then
-			obj:update(dt)
-		end
 	end
+
+
 
 	-- Camera
 	local cam = Game.camera
@@ -219,7 +218,7 @@ function love.draw()
 		love.graphics.setColor(1, 1, 1)
 		love.graphics.print(("FPS: %d"):format(love.timer.getFPS()), 8, 8)
 		print(dbg.pp(Game))
-		print(dbg.pp(Game.objects[1]))
+		print(dbg.pp(Game.unlocks[1]))
 	end
 
 	push.start()
@@ -248,10 +247,17 @@ function love.draw()
 		love.graphics.setColor(0.1, 0.1, 0.1)
 		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
 
-		for _, obj in ipairs(Game.objects) do
+		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
 			love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
 			--love.graphics.draw(obj.sprite, obj.x, obj.y)
+		end
+
+		for _, obj in ipairs(Game.objects) do
+			if (UnlockedColor[obj.col]) then
+				love.graphics.setColor(1, 1, 1, 1)
+				love.graphics.draw(obj.sprite, obj.x, obj.y)
+			end
 		end
 
 		love.graphics.pop()
