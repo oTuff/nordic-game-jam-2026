@@ -32,7 +32,7 @@ function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setNewFont(36)
 
-	Gamemap = sti("assets/tield/frø.lua")
+	Gamemap = sti("assets/tield/rgb.lua")
 	Gamemap:resize(GAME_WIDTH, GAME_HEIGHT)
 	WORLD_WIDTH  = Gamemap.width * Gamemap.tilewidth
 	WORLD_HEIGHT = Gamemap.height * Gamemap.tileheight
@@ -137,9 +137,9 @@ function love.load()
 	Game.player = player.new(100, 100)
 	--- @type Unlocks[]
 	Game.unlocks = {
-		{ col = "red",   x = 300, y = 300, color = { 1, 0, 0, 1 } }, -- red 1
-		{ col = "green", x = 500, y = 200, color = { 0, 1, 0, 1 } }, -- green 2
-		{ col = "blue",  x = 100, y = 800, color = { 0, 0, 1, 1 } } -- blue 3
+		{ col = "red",   x = 150, y = 100, color = { 1, 0, 0, 1 } }, -- red 1
+		{ col = "green", x = 200, y = 200, color = { 0, 1, 0, 1 } }, -- green 2
+		{ col = "blue",  x = 300, y = 300, color = { 0, 0, 1, 1 } } -- blue 3
 	}
 	--- @type Entity[]
 	Game.objects = {
@@ -188,8 +188,10 @@ function love.update(dt)
 
 	p:update(dt)
 
-	for index, value in pairs(UnlockedColor) do
-		print(index .. tostring(value))
+	for _, obj in ipairs(Game.objects) do
+		if obj.update then
+			obj:update(dt) -- only for objects to update
+		end
 	end
 
 	for index, obj in ipairs(Game.unlocks) do
@@ -234,7 +236,13 @@ function love.draw()
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
-		--Gamemap:draw(cx, cy)
+
+		for key, value in pairs(UnlockedColor) do
+			if value then
+				Gamemap:drawLayer(Gamemap.layers[key], cx, cy)
+			end
+		end
+
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		love.graphics.push()
