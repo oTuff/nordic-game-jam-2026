@@ -1,6 +1,7 @@
----@class Enemy: Object
+---@class Enemy:Object
 ---@field speed number
 ---@field direction number
+---@field sprite love.Image
 local Enemy = {}
 Enemy.__index = Enemy
 

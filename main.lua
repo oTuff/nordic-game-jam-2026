@@ -236,13 +236,11 @@ function love.draw()
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
-
 		for key, value in pairs(UnlockedColor) do
 			if value then
 				Gamemap:drawLayer(Gamemap.layers[key], cx, cy)
 			end
 		end
-
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		love.graphics.push()
