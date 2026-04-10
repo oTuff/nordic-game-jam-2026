@@ -75,13 +75,13 @@ end
 physics.CheckCollosion = function(a, b)
     local ax = a.body.x
     local ay = a.body.y
-    local ax2 = a.body.x + 32
-    local ay2 = a.body.y + 32
+    local ax2 = a.body.x + TILE_SIZE
+    local ay2 = a.body.y + TILE_SIZE
 
     local bx = b.x
     local by = b.y
-    local bx2 = b.x + 32
-    local by2 = b.y + 32
+    local bx2 = b.x + TILE_SIZE
+    local by2 = b.y + TILE_SIZE
 
     return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
 end
@@ -90,8 +90,8 @@ end
 ---@param a Player
 ---@param b Object
 physics.HandleCollision = function(a, b)
-    local overlapX = math.min(a.body.x + 32 - b.x, b.x + 32 - a.body.x)
-    local overlapY = math.min(a.body.y + 32 - b.y, b.y + 32 - a.body.y)
+    local overlapX = math.min(a.body.x + TILE_SIZE - b.x, b.x + TILE_SIZE - a.body.x)
+    local overlapY = math.min(a.body.y + TILE_SIZE - b.y, b.y + TILE_SIZE - a.body.y)
 
     if overlapX < overlapY then
         if a.body.x < b.x then
