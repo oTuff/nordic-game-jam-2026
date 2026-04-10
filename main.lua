@@ -200,8 +200,6 @@ function love.update(dt)
 		end
 	end
 
-
-
 	-- Camera
 	local cam = Game.camera
 	local targetX = p.body.x - GAME_WIDTH / 2
