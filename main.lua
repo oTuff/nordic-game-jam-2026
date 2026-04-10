@@ -127,13 +127,13 @@ function love.load()
 	--- @type Object[]
 	Game.objects = {
 		-- Static game objects
-		{ x = 300, y = 300, sprite = Game.assets.images.test },
-		{ x = 350, y = 400, sprite = Game.assets.images.test },
+		-- { x = 300, y = 300, sprite = Game.assets.images.test },
+		-- { x = 350, y = 400, sprite = Game.assets.images.test },
 
 		-- Enemies
-		enemy.new(400, 100),
-		enemy.new(500, 250),
-		enemy.new(600, 600),
+		-- enemy.new(400, 100),
+		-- enemy.new(500, 250),
+		-- enemy.new(600, 600),
 	}
 end
 
@@ -180,8 +180,8 @@ function love.update(dt)
 
 	for _, obj in ipairs(Game.objects) do
 		if physics.CheckCollosion(p, obj) then
-			physics.HandleCollision(p, obj)
-			--print("col " .. p.body.x .. " " .. p.body.y)
+			-- physics.HandleCollision(p, obj)
+			-- print("col " .. p.body.x .. " " .. p.body.y)
 		end
 
 		if obj.update then
@@ -222,7 +222,7 @@ function love.draw()
 		-- Fix push working with sti
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
-		Gamemap:draw(cx, cy)
+		-- Gamemap:draw(cx, cy)
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		love.graphics.push()
@@ -230,6 +230,9 @@ function love.draw()
 
 		local p = Game.player
 		love.graphics.draw(p.sprite, p.body.x, p.body.y)
+		love.graphics.setColor(0.1, 0.1, 0.1)
+		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
+		love.graphics.reset()
 
 		for _, obj in ipairs(Game.objects) do
 			love.graphics.draw(obj.sprite, obj.x, obj.y)
