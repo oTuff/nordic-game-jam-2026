@@ -68,6 +68,8 @@ function Body:integrate(dt)
     end
 end
 
+--- check collison on player vs objects (box)
+---@return boolean
 ---@param a Player
 ---@param b Object
 physics.CheckCollosion = function(a, b)
@@ -82,6 +84,30 @@ physics.CheckCollosion = function(a, b)
     local by2 = b.y + 32
 
     return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
+end
+
+--- stops player movemennt on object (as if objects are solid)
+---@param a Player
+---@param b Object
+physics.HandleCollision = function(a, b)
+    local overlapX = math.min(a.body.x + 32 - b.x, b.x + 32 - a.body.x)
+    local overlapY = math.min(a.body.y + 32 - b.y, b.y + 32 - a.body.y)
+
+    if overlapX < overlapY then
+        if a.body.x < b.x then
+            a.body.x = a.body.x - overlapX
+        else
+            a.body.x = a.body.x + overlapX
+        end
+        a.body.velx = 0
+    else
+        if a.body.y < b.y then
+            a.body.y = a.body.y - overlapY
+        else
+            a.body.y = a.body.y + overlapY
+        end
+        a.body.vely = 0
+    end
 end
 
 physics.Body = Body

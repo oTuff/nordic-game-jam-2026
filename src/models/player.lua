@@ -17,8 +17,6 @@ function Player.new(x, y, spriteOverwrite)
 end
 
 function Player:update(dt)
-	self.body:clearForce()
-
 	-- input handling --
 	local kb = Game.settings.controls
 	local gp = Game.settings.gamepad
@@ -49,6 +47,7 @@ function Player:update(dt)
 	-- clamp
 	self.body.x = math.max(0, math.min(WORLD_WIDTH - TILE_SIZE, self.body.x))
 	self.body.y = math.max(0, math.min(WORLD_HEIGHT - TILE_SIZE, self.body.y))
+	self.body:clearForce()
 end
 
 return Player

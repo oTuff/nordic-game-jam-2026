@@ -180,7 +180,8 @@ function love.update(dt)
 
 	for _, obj in ipairs(Game.objects) do
 		if physics.CheckCollosion(p, obj) then
-			print("col " .. p.body.x .. " " .. p.body.y)
+			physics.HandleCollision(p, obj)
+			--print("col " .. p.body.x .. " " .. p.body.y)
 		end
 
 		if obj.update then
