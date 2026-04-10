@@ -5,9 +5,11 @@ local player = require("src.models.player")
 local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
-local menu = require("src.menu")
-local keybind_menu = require("src.keybind_menu")
-local video_menu = require("src.video_menu")
+
+local main_menu = require("src.screens.main_menu")
+local pause_menu = require("src.screens.pause_menu")
+local settings_menu = require("src.screens.settings_menu")
+local credits = require("src.screens.credits")
 
 ---@class Object
 ---@field x integer
@@ -113,83 +115,12 @@ function love.load()
 		currentState = GameState.menu,
 		assets = loader.load(),
 		settings = data,
-		keybind_menu = keybind_menu,
-		video_menu = video_menu,
 	}
 
-	-- Menus
-	Game.main_menu = menu.new({
-		{
-			label = "Play",
-			action = function()
-				Game.currentState = GameState.playing
-			end,
-		},
-		{
-			label = "Settings",
-			action = function()
-				Game.currentState = GameState.settings
-				Game._settings_return = GameState.menu
-			end,
-		},
-		{
-			label = "Credits",
-			action = function()
-				Game.currentState = GameState.credits
-			end,
-		},
-		{
-			label = "Quit",
-			action = function()
-				love.event.quit()
-			end,
-		},
-	})
-
-	Game.pause_menu = menu.new({
-		{
-			label = "Resume",
-			action = function()
-				Game.currentState = GameState.playing
-			end,
-		},
-		{
-			label = "Settings",
-			action = function()
-				Game.currentState = GameState.settings
-				Game._settings_return = GameState.paused
-			end,
-		},
-		{
-			label = "Main Menu",
-			action = function()
-				Game.currentState = GameState.menu
-			end,
-		},
-		{
-			label = "Quit",
-			action = function()
-				love.event.quit()
-			end,
-		},
-	})
-
-	Game.settings_menu = menu.new({
-		{
-			label = "Keybinds",
-			action = function()
-				Game.currentState = GameState.settings_keybinds
-				Game.keybind_menu.open = true
-			end,
-		},
-		{
-			label = "Video",
-			action = function()
-				Game.currentState = GameState.settings_video
-				Game.video_menu.open = true
-			end,
-		},
-	})
+	-- Initialize screens
+	main_menu.init()
+	pause_menu.init()
+	settings_menu.init()
 
 	Game.camera = { x = 0, y = 0 }
 	Game.player = player.new(100, 100)
@@ -205,6 +136,39 @@ function love.load()
 		enemy.new(600, 600),
 	}
 end
+
+-- Screen dispatch tables
+local screen_draw = {
+	menu = function() main_menu.draw() end,
+	credits = function() credits.draw() end,
+	settings = function() settings_menu.draw() end,
+	settings_keybinds = function() settings_menu.keybinds.draw() end,
+	settings_video = function() settings_menu.video.draw() end,
+}
+
+local screen_keypressed = {
+	menu = function(key) main_menu.keypressed(key) end,
+	credits = function(key) credits.keypressed(key) end,
+	settings = function(key) settings_menu.keypressed(key) end,
+	settings_keybinds = function(key, scancode) settings_menu.keybinds.keypressed(key, scancode) end,
+	settings_video = function(key) settings_menu.video.keypressed(key) end,
+	playing = function(key)
+		if key == "escape" then Game.currentState = GameState.paused end
+	end,
+	paused = function(key) pause_menu.keypressed(key) end,
+}
+
+local screen_gamepadpressed = {
+	menu = function(button) main_menu.gamepadpressed(button) end,
+	credits = function(button) credits.gamepadpressed(button) end,
+	settings = function(button) settings_menu.gamepadpressed(button) end,
+	settings_keybinds = function(button) settings_menu.keybinds.gamepadpressed(button) end,
+	settings_video = function(button) settings_menu.video.gamepadpressed(button) end,
+	playing = function(button)
+		if button == "start" then Game.currentState = GameState.paused end
+	end,
+	paused = function(button) pause_menu.gamepadpressed(button) end,
+}
 
 ---@param dt number
 function love.update(dt)
@@ -246,27 +210,10 @@ function love.draw()
 	push.start()
 
 	local state = Game.currentState
+	local draw_fn = screen_draw[state]
 
-	if state == GameState.menu then
-		menu.draw(Game.main_menu, "My Game")
-	elseif state == GameState.credits then
-		local w, h = GAME_WIDTH, GAME_HEIGHT
-		love.graphics.setColor(0, 0, 0, 0.7)
-		love.graphics.rectangle("fill", 0, 0, w, h)
-		love.graphics.setColor(1, 1, 1)
-		love.graphics.printf("Credits", 0, 120, w, "center")
-		love.graphics.setColor(0.8, 0.8, 0.8)
-		love.graphics.printf("A game made for Nordic Game Jam 2026", 0, 250, w, "center")
-		love.graphics.printf("Made by:", 0, 320, w, "center")
-		love.graphics.printf("Oscar, William & Alexander Tuff", 0, 360, w, "center")
-		love.graphics.setColor(0.6, 0.6, 0.6)
-		love.graphics.printf("Escape to go back", 0, h - 80, w, "center")
-	elseif state == GameState.settings then
-		menu.draw(Game.settings_menu, "Settings")
-	elseif state == GameState.settings_keybinds then
-		Game.keybind_menu.draw()
-	elseif state == GameState.settings_video then
-		Game.video_menu.draw()
+	if draw_fn then
+		draw_fn()
 	else -- playing or paused: draw the game world
 		local cx = -math.floor(Game.camera.x)
 		local cy = -math.floor(Game.camera.y)
@@ -291,7 +238,7 @@ function love.draw()
 
 		-- Draw pause overlay on top of game
 		if state == GameState.paused then
-			menu.draw(Game.pause_menu, "Paused")
+			pause_menu.draw()
 		end
 	end
 
@@ -299,93 +246,13 @@ function love.draw()
 end
 
 function love.keypressed(key, scancode)
-	local state = Game.currentState
-
-	if state == GameState.menu then
-		menu.keypressed(Game.main_menu, key)
-	elseif state == GameState.credits then
-		if key == "escape" then
-			Game.currentState = GameState.menu
-		end
-	elseif state == GameState.settings then
-		if key == "escape" then
-			Game.currentState = Game._settings_return or GameState.menu
-			Game._settings_return = nil
-			return
-		end
-		menu.keypressed(Game.settings_menu, key)
-	elseif state == GameState.settings_keybinds then
-		if key == "escape" and not Game.keybind_menu.listening
-			and not Game.keybind_menu.has_any_unbound() then
-			Game.keybind_menu.open = false
-			Game.currentState = GameState.settings
-			lip.save(SETTINGS_FILENAME, Game.settings)
-			return
-		end
-		Game.keybind_menu.keypressed(key, scancode)
-	elseif state == GameState.settings_video then
-		if key == "escape" then
-			Game.video_menu.open = false
-			Game.currentState = GameState.settings
-			return
-		end
-		Game.video_menu.keypressed(key)
-	elseif state == GameState.playing then
-		if key == "escape" then
-			Game.currentState = GameState.paused
-		end
-	elseif state == GameState.paused then
-		if key == "escape" then
-			Game.currentState = GameState.playing
-		else
-			menu.keypressed(Game.pause_menu, key)
-		end
-	end
+	local handler = screen_keypressed[Game.currentState]
+	if handler then handler(key, scancode) end
 end
 
 function love.gamepadpressed(joystick, button)
-	local state = Game.currentState
-
-	if state == GameState.menu then
-		menu.gamepadpressed(Game.main_menu, button)
-	elseif state == GameState.credits then
-		if button == "b" then
-			Game.currentState = GameState.menu
-		end
-	elseif state == GameState.settings then
-		if button == "b" then
-			Game.currentState = Game._settings_return or GameState.menu
-			Game._settings_return = nil
-			return
-		end
-		menu.gamepadpressed(Game.settings_menu, button)
-	elseif state == GameState.settings_keybinds then
-		if button == "b" and not Game.keybind_menu.listening
-			and not Game.keybind_menu.has_any_unbound() then
-			Game.keybind_menu.open = false
-			Game.currentState = GameState.settings
-			lip.save(SETTINGS_FILENAME, Game.settings)
-			return
-		end
-		Game.keybind_menu.gamepadpressed(button)
-	elseif state == GameState.settings_video then
-		if button == "b" then
-			Game.video_menu.open = false
-			Game.currentState = GameState.settings
-			return
-		end
-		Game.video_menu.gamepadpressed(button)
-	elseif state == GameState.playing then
-		if button == "start" then
-			Game.currentState = GameState.paused
-		end
-	elseif state == GameState.paused then
-		if button == "b" or button == "start" then
-			Game.currentState = GameState.playing
-		else
-			menu.gamepadpressed(Game.pause_menu, button)
-		end
-	end
+	local handler = screen_gamepadpressed[Game.currentState]
+	if handler then handler(button) end
 end
 
 function love.resize()
