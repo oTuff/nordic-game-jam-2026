@@ -34,7 +34,6 @@ end
 function Body:integrate(dt)
     local pixelPerSecScale = 100
     local frictionCoeff = 2.298
-    local frictionCoeffY = 0.914
 
     self.velx = self.velx + self.ax * dt
     self.vely = self.vely + self.ay * dt
@@ -48,6 +47,12 @@ function Body:integrate(dt)
     if self.velx <= -self.maxSpeed then
         self.velx = -self.maxSpeed
     end
+    if self.vely >= self.maxSpeed then
+        self.vely = self.maxSpeed
+    end
+    if self.vely <= -self.maxSpeed then
+        self.vely = -self.maxSpeed
+    end
 
     if math.abs(self.ax) == 0 then -- add friction when not accelerating
         self.velx = self.velx - self.velx * frictionCoeff * dt
@@ -56,7 +61,10 @@ function Body:integrate(dt)
         end
     end
     if math.abs(self.ay) == 0 then -- same for y-axis
-        self.vely = self.vely - self.vely * frictionCoeffY * dt
+        self.vely = self.vely - self.vely * frictionCoeff * dt
+        if math.abs(self.vely) <= math.abs(0.3) then
+            self.vely = 0
+        end
     end
 end
 
