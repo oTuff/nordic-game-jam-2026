@@ -14,9 +14,9 @@ local credits = require("src.screens.credits")
 ---@class Object
 ---@field x integer
 ---@field y integer
----@field sprite love.Image
----@field update? fun(self, dt:number)
-
+---@field color number[]
+---@field update function?
+---@field col string
 function love.load()
 	--[[ Constants(not supposed to change): denoted with CAPITALIZED snake_case ]]
 	TILE_SIZE = 32
@@ -95,6 +95,12 @@ function love.load()
 		end
 	end
 
+	UnlockedColor = {
+		red = false,
+		green = false,
+		blue = false
+	}
+
 	-- Apply saved video settings
 	local vid = data.video
 	love.window.setMode(vid.width, vid.height, {
@@ -126,6 +132,9 @@ function love.load()
 	Game.player = player.new(100, 100)
 	--- @type Object[]
 	Game.objects = {
+		{ col = "red",   x = 300, y = 300, color = { 1, 0, 0, 1 } }, -- red 1
+		{ col = "green", x = 500, y = 200, color = { 0, 1, 0, 1 } }, -- green 2
+		{ col = "blue",  x = 100, y = 800, color = { 0, 0, 1, 1 } } -- blue 3
 		-- Static game objects
 		-- { x = 300, y = 300, sprite = Game.assets.images.test },
 		-- { x = 350, y = 400, sprite = Game.assets.images.test },
@@ -178,10 +187,15 @@ function love.update(dt)
 
 	p:update(dt)
 
-	for _, obj in ipairs(Game.objects) do
+	for index, value in pairs(UnlockedColor) do
+		print(index .. tostring(value))
+	end
+
+	for index, obj in ipairs(Game.objects) do
 		if physics.CheckCollosion(p, obj) then
-			-- physics.HandleCollision(p, obj)
-			-- print("col " .. p.body.x .. " " .. p.body.y)
+			table.remove(Game.objects, index)
+			UnlockedColor[obj.col] = true
+			print("col " .. p.body.x .. " " .. p.body.y)
 		end
 
 		if obj.update then
@@ -222,20 +236,22 @@ function love.draw()
 		-- Fix push working with sti
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
-		-- Gamemap:draw(cx, cy)
+		love.graphics.setColor(1, 1, 1, 1)
+		--Gamemap:draw(cx, cy)
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		love.graphics.push()
 		love.graphics.translate(cx, cy)
 
 		local p = Game.player
-		love.graphics.draw(p.sprite, p.body.x, p.body.y)
+		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
 		love.graphics.setColor(0.1, 0.1, 0.1)
 		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
-		love.graphics.reset()
 
 		for _, obj in ipairs(Game.objects) do
-			love.graphics.draw(obj.sprite, obj.x, obj.y)
+			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
+			love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
+			--love.graphics.draw(obj.sprite, obj.x, obj.y)
 		end
 
 		love.graphics.pop()

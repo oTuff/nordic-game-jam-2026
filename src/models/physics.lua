@@ -88,7 +88,7 @@ end
 
 --- stops player movemennt on object (as if objects are solid)
 ---@param a Player
----@param b Object
+---@param b table
 physics.HandleCollision = function(a, b)
     local overlapX = math.min(a.body.x + TILE_SIZE - b.x, b.x + TILE_SIZE - a.body.x)
     local overlapY = math.min(a.body.y + TILE_SIZE - b.y, b.y + TILE_SIZE - a.body.y)
