@@ -186,7 +186,6 @@ function love.update(dt)
 	if Game.currentState ~= GameState.playing then return end
 
 	local p = Game.player
-
 	p:update(dt)
 
 	for _, obj in ipairs(Game.objects) do
@@ -258,7 +257,6 @@ function love.draw()
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
 			love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
-			--love.graphics.draw(obj.sprite, obj.x, obj.y)
 		end
 
 		for _, obj in ipairs(Game.objects) do

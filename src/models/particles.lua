@@ -1,6 +1,17 @@
 Particles = {
+    ---@type Particle[]
     ParticleActive = {},
+    ---@type Particle[]
     ParticlePool = {},
+
+    ---@class Particle
+    ---@field lifetime number
+    ---@field speed number
+    ---@field x number
+    ---@field y number
+    ---@field xv number
+    ---@field yv number
+    ---@field color number[]
 
     ---@class Effects
     ---@field count number[]
@@ -29,11 +40,11 @@ Particles = {
         }
     }
 }
----@param _x number
----@param _y number
----@param _xv number
----@param _yv number
----@param type Effects
+---@param _x number start x
+---@param _y number start y
+---@param _xv number x dir (0 for omnidir)
+---@param _yv number y dir
+---@param type Effects what effect to spawn
 function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
     for i = love.math.random(type.count[1], type.count[2]), 1, -1 do
         local theta = math.sin(math.rad(love.math.random(-type.spread, type.spread)))
@@ -44,26 +55,25 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
     end
 end
 
---- dont use its for internal instead use spawnParticleEffect
+--- dont use its for internal usage. Instead use spawnParticleEffect
 function Particles:spawnParticle(x, y, xv, yv, type)
+    --@type Particle (it doesnt like line below: p = {})
     local p = table.remove(self.ParticlePool)
     if not p then
         p = {}
     end
-
     p.x, p.y, p.xv, p.yv = x, y, xv, yv
     p.lifetime = math.random() * (type.lifetime[2] - type.lifetime[1]) + type.lifetime[1]
     p.color = type.color
-    --other stuff from type
     p.speed = love.math.random() * (type.speed[2] - type.speed[1]) + type.speed[1]
     table.insert(self.ParticleActive, p)
 end
 
 function Particles:killParticle(i)
-    local b = self.ParticleActive[i]
+    local p = self.ParticleActive[i]
     self.ParticleActive[i] = self.ParticleActive[#self.ParticleActive]
     self.ParticleActive[#self.ParticleActive] = nil
-    table.insert(self.ParticlePool, b)
+    table.insert(self.ParticlePool, p)
 end
 
 function Particles:update(dt)
