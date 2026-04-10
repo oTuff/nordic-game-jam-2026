@@ -316,7 +316,7 @@ function love.keypressed(key, scancode)
 		menu.keypressed(Game.settings_menu, key)
 	elseif state == GameState.settings_keybinds then
 		if key == "escape" and not Game.keybind_menu.listening
-		    and not Game.keybind_menu.has_any_unbound() then
+			and not Game.keybind_menu.has_any_unbound() then
 			Game.keybind_menu.open = false
 			Game.currentState = GameState.settings
 			lip.save(SETTINGS_FILENAME, Game.settings)
@@ -361,7 +361,7 @@ function love.gamepadpressed(joystick, button)
 		menu.gamepadpressed(Game.settings_menu, button)
 	elseif state == GameState.settings_keybinds then
 		if button == "b" and not Game.keybind_menu.listening
-		    and not Game.keybind_menu.has_any_unbound() then
+			and not Game.keybind_menu.has_any_unbound() then
 			Game.keybind_menu.open = false
 			Game.currentState = GameState.settings
 			lip.save(SETTINGS_FILENAME, Game.settings)
