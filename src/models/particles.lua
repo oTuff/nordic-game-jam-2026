@@ -2,7 +2,13 @@ Particles = {
     ParticleActive = {},
     ParticlePool = {},
 
-
+    ---@class Effects
+    ---@field count number[]
+    ---@field lifetime number[]
+    ---@field speed number[]
+    ---@field size number[]
+    ---@field color number[]
+    ---@field spread number
 
     Effects = {
         explosion = {
@@ -23,7 +29,11 @@ Particles = {
         }
     }
 }
-
+---@param _x number
+---@param _y number
+---@param _xv number
+---@param _yv number
+---@param type Effects
 function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
     for i = love.math.random(type.count[1], type.count[2]), 1, -1 do
         local theta = math.sin(math.rad(love.math.random(-type.spread, type.spread)))
@@ -34,6 +44,7 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
     end
 end
 
+--- dont use its for internal instead use spawnParticleEffect
 function Particles:spawnParticle(x, y, xv, yv, type)
     local p = table.remove(self.ParticlePool)
     if not p then
