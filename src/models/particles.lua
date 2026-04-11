@@ -20,6 +20,7 @@ Particles = {
     ---@field size number[]
     ---@field color number[]
     ---@field spread number
+    ---@field offset number
 
     ---@type table Effects
     Effects = {
@@ -29,7 +30,8 @@ Particles = {
             speed = { 0.1, 0.33 },
             size = { 3, 10 },
             color = { 1, 0.4, 0.1, 0.8 },
-            spread = 180 -- in degrees range from -180 to 180
+            spread = 180, -- in degrees range from -180 to 180
+            offset = 32 / 2,
         },
         muzzleFlash = {
             count = { 18, 42 },
@@ -37,9 +39,19 @@ Particles = {
             speed = { 1.1, 2.3 },
             size = { 5, 10 },
             color = { 1, 1, 0.6 },
-            spread = 20 -- in degrees
-        }
-    }
+            spread = 20, -- in degrees
+            offset = 0,
+        },
+        portal = {
+            count = { 150, 200 },
+            lifetime = { 0.12, 0.63 },
+            speed = { 0.22, 0.34 },
+            size = { 3, 7 },
+            color = { 0.24, 0.10, 0.43 },
+            spread = 180, -- in degrees
+            offset = 32 * 2.5,
+        },
+    },
 }
 ---@param _x number start x
 ---@param _y number start y
@@ -52,9 +64,13 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
         local phi = math.sin(math.rad(love.math.random(-type.spread, type.spread)))
         local xv = _xv + (love.math.random() * (type.speed[2] - type.speed[1]) + type.speed[1]) * theta
         local yv = _yv + (love.math.random() * (type.speed[2] - type.speed[1]) + type.speed[1]) * phi
-        local size = TILE_SIZE / 1.5
-        local offsetx = _x + (love.math.random() * (size - (-size)) + (-size))
-        local offsety = _y + (love.math.random() * (size - (-size)) + (-size))
+        local len = math.sqrt(xv * xv + yv * yv)
+        if len > type.speed[2] * 0.8 then
+            xv = (xv / len) * type.speed[2] * 0.7
+            yv = (yv / len) * type.speed[2] * 0.7
+        end
+        local offsetx = _x + (love.math.random() * (type.offset - (-type.offset)) + (-type.offset))
+        local offsety = _y + (love.math.random() * (type.offset - (-type.offset)) + (-type.offset))
         self:spawnParticle(offsetx, offsety, xv, yv, type)
     end
 end
@@ -94,8 +110,8 @@ end
 
 function Particles:draw()
     for _, p in ipairs(self.ParticleActive) do
-        love.graphics.setColor(p.color);
-        love.graphics.rectangle("fill", p.x, p.y, 5, 5);
+        love.graphics.setColor(p.color)
+        love.graphics.rectangle("fill", p.x, p.y, 5, 5)
     end
 end
 
