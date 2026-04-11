@@ -104,8 +104,13 @@ function love.load()
 
 	UnlockedColor = {
 		red = false,
-		green = false,
-		blue = false
+		lightgreen = false,
+		blue = false,
+		yellow = false,
+		pink = false,
+		brown = false,
+		darkgreen = false,
+		darkblue = false
 	}
 
 	-- Apply saved video settings
@@ -139,9 +144,10 @@ function love.load()
 	Game.player = player.new(100, 100)
 	--- @type Unlocks[]
 	Game.unlocks = {
-		{ col = "red",   x = 150, y = 100, color = { 1, 0, 0, 1 } }, -- red 1
-		{ col = "green", x = 200, y = 200, color = { 0, 1, 0, 1 } }, -- green 2
-		{ col = "blue",  x = 300, y = 300, color = { 0, 0, 1, 1 } } -- blue 3
+		{ col = "red",        x = TILE_SIZE * 10, y = TILE_SIZE * 44, color = { 1, 0, 0, 1 } }, -- red 1
+		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 } }, -- green 2
+		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 } }, -- blue 3
+		{ col = "yellow",     x = TILE_SIZE * 11, y = TILE_SIZE * 20, color = { 1, 1, 0, 1 } }
 	}
 	--- @type Entity[]
 	Game.objects = {

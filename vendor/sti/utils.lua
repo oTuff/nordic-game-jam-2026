@@ -3,16 +3,16 @@ local utils = {}
 
 -- https://github.com/stevedonovan/Penlight/blob/master/lua/pl/path.lua#L286
 function utils.format_path(path)
-	local np_gen1,np_gen2  = '[^SEP]+SEP%.%.SEP?','SEP+%.?SEP'
-	local np_pat1, np_pat2 = np_gen1:gsub('SEP','/'), np_gen2:gsub('SEP','/')
+	local np_gen1, np_gen2 = '[^SEP]+SEP%.%.SEP?', 'SEP+%.?SEP'
+	local np_pat1, np_pat2 = np_gen1:gsub('SEP', '/'), np_gen2:gsub('SEP', '/')
 	local k
 
 	repeat -- /./ -> /
-		path,k = path:gsub(np_pat2,'/',1)
+		path, k = path:gsub(np_pat2, '/', 1)
 	until k == 0
 
 	repeat -- A/../ -> (empty)
-		path,k = path:gsub(np_pat1,'',1)
+		path, k = path:gsub(np_pat1, '', 1)
 	until k == 0
 
 	if path == '' then path = '.' end
@@ -57,7 +57,7 @@ function utils.get_tiles(imageW, tileW, margin, spacing)
 	while imageW >= tileW do
 		imageW = imageW - tileW
 		if n ~= 0 then imageW = imageW - spacing end
-		if imageW >= 0 then n  = n + 1 end
+		if imageW >= 0 then n = n + 1 end
 	end
 
 	return n
@@ -95,7 +95,7 @@ function utils.convert_ellipse_to_polygon(x, y, w, h, max_segments)
 		segments = segments or 64
 		local vertices = {}
 
-		local v = { 1, 2, ceil(segments/4-1), ceil(segments/4) }
+		local v = { 1, 2, ceil(segments / 4 - 1), ceil(segments / 4) }
 
 		local m
 		if love and love.physics then
@@ -117,7 +117,7 @@ function utils.convert_ellipse_to_polygon(x, y, w, h, max_segments)
 
 		-- Box2D threshold
 		if dist1 < 0.0025 or dist2 < 0.0025 then
-			return calc_segments(segments-2)
+			return calc_segments(segments - 2)
 		end
 
 		return segments
@@ -205,7 +205,7 @@ end
 
 function utils.deepCopy(t)
 	local copy = {}
-	for k,v in pairs(t) do
+	for k, v in pairs(t) do
 		if type(v) == "table" then
 			v = utils.deepCopy(v)
 		end

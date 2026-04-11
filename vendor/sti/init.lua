@@ -877,7 +877,7 @@ function Map:update(dt)
 			if update and self.tileInstances[tile.gid] then
 				for _, j in pairs(self.tileInstances[tile.gid]) do
 					local t = self.tiles
-					    [tonumber(tile.animation[tile.frame].tileid) + self.tilesets[tile.tileset].firstgid]
+						[tonumber(tile.animation[tile.frame].tileid) + self.tilesets[tile.tileset].firstgid]
 					j.batch:set(j.id, t.quad, j.x, j.y, j.r, tile.sx, tile.sy, 0, j.oy)
 				end
 			end
@@ -950,7 +950,7 @@ function Map.drawLayer(_, layer)
 	-- if the layer has a tintcolor set
 	if layer.tintcolor then
 		r, g, b, a = unpack(layer.tintcolor)
-		a = a or 255                      -- alpha may not be specified
+		a = a or 255                              -- alpha may not be specified
 		lg.setColor(r / 255, g / 255, b / 255, a / 255) -- Tiled uses 0-255
 		-- if a tintcolor is not given just use the current color
 	else
@@ -1348,30 +1348,30 @@ function Map:convertTileToPixel(x, y)
 		local tileW = self.tilewidth
 		local tileH = self.tileheight
 		return
-		    x * tileW,
-		    y * tileH
+			x * tileW,
+			y * tileH
 	elseif self.orientation == "isometric" then
 		local mapH    = self.height
 		local tileW   = self.tilewidth
 		local tileH   = self.tileheight
 		local offsetX = mapH * tileW / 2
 		return
-		    (x - y) * tileW / 2 + offsetX,
-		    (x + y) * tileH / 2
+			(x - y) * tileW / 2 + offsetX,
+			(x + y) * tileH / 2
 	elseif self.orientation == "staggered" or
-	    self.orientation == "hexagonal" then
+		self.orientation == "hexagonal" then
 		local tileW   = self.tilewidth
 		local tileH   = self.tileheight
 		local sideLen = self.hexsidelength or 0
 
 		if self.staggeraxis == "x" then
 			return
-			    x * tileW,
-			    ceil(y) * (tileH + sideLen) + (ceil(y) % 2 == 0 and tileH or 0)
+				x * tileW,
+				ceil(y) * (tileH + sideLen) + (ceil(y) % 2 == 0 and tileH or 0)
 		else
 			return
-			    ceil(x) * (tileW + sideLen) + (ceil(x) % 2 == 0 and tileW or 0),
-			    y * tileH
+				ceil(x) * (tileW + sideLen) + (ceil(x) % 2 == 0 and tileW or 0),
+				y * tileH
 		end
 	end
 end
@@ -1386,16 +1386,16 @@ function Map:convertPixelToTile(x, y)
 		local tileW = self.tilewidth
 		local tileH = self.tileheight
 		return
-		    x / tileW,
-		    y / tileH
+			x / tileW,
+			y / tileH
 	elseif self.orientation == "isometric" then
 		local mapH    = self.height
 		local tileW   = self.tilewidth
 		local tileH   = self.tileheight
 		local offsetX = mapH * tileW / 2
 		return
-		    y / tileH + (x - offsetX) / tileW,
-		    y / tileH - (x - offsetX) / tileW
+			y / tileH + (x - offsetX) / tileW,
+			y / tileH - (x - offsetX) / tileW
 	elseif self.orientation == "staggered" then
 		local staggerX = self.staggeraxis == "x"
 		local even     = self.staggerindex == "even"
@@ -1586,8 +1586,8 @@ function Map:convertPixelToTile(x, y)
 		local offsets = staggerX and offsetsStaggerX or offsetsStaggerY
 
 		return
-		    referenceX + offsets[nearest].x,
-		    referenceY + offsets[nearest].y
+			referenceX + offsets[nearest].x,
+			referenceY + offsets[nearest].y
 	end
 end
 
