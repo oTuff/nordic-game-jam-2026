@@ -1,0 +1,11 @@
+root = true
+
+[*.lua]
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+indent_style = tab
+quote_style = double
+end_statement_with_semicolon = never
+table_separator_style = comma
+trailing_table_separator = smart
