@@ -1,6 +1,8 @@
 -- Generic menu: a vertical list of items with keyboard + gamepad navigation.
 -- Each item is { label = "...", action = function, enabled = true/false }
 
+local sound = require("src.sound")
+
 local menu = {}
 
 function menu.new(items)
@@ -16,6 +18,7 @@ function menu.keypressed(m, key)
 			m.selected = m.selected - 1
 			if m.selected < 1 then m.selected = #m.items end
 		until m.items[m.selected].enabled ~= false
+		sound.play("menuBlip")
 		return true
 	end
 
@@ -24,12 +27,14 @@ function menu.keypressed(m, key)
 			m.selected = m.selected + 1
 			if m.selected > #m.items then m.selected = 1 end
 		until m.items[m.selected].enabled ~= false
+		sound.play("menuBlip")
 		return true
 	end
 
 	if key == "return" then
 		local item = m.items[m.selected]
 		if item.enabled ~= false and item.action then
+			sound.play("menuSelect")
 			item.action()
 		end
 		return true

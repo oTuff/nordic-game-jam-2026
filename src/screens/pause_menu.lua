@@ -1,4 +1,5 @@
 local menu = require("src.menu")
+local sound = require("src.sound")
 
 local pause_menu = {}
 
@@ -21,6 +22,7 @@ function pause_menu.init()
 			label = "Main Menu",
 			action = function()
 				Game.currentState = GameState.menu
+				sound.stopAllAmbient()
 			end,
 		},
 		{

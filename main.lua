@@ -6,6 +6,7 @@ local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
 local particles = require("src.models.particles")
+local sound = require("src.sound")
 local walls = require("assets.tield.map")
 
 local main_menu = require("src.screens.main_menu")
@@ -147,6 +148,9 @@ function love.load()
 	pause_menu.init()
 	settings_menu.init()
 
+	-- Initialize sound system
+	sound.init()
+
 	Game.camera = { x = 0, y = 0 }
 
 	-- White ending transition state
@@ -215,6 +219,8 @@ function love.load()
 			self.pulled = true
 			self.frameIndex = #self.frames
 			YellowPuzzle.solved = true
+			sound.play("leverPull")
+			sound.play("puzzleSolved")
 			-- Particle effect at the opened path
 			for _, block in ipairs(YellowPuzzle.yellowBlocked) do
 				particles:spawnParticleEffect(block.x + 16, block.y + 16, 0, 0, {
@@ -285,10 +291,18 @@ function love.load()
 				if lever.col == self.correctOrder[self.progress + 1] then
 					lever.pulled = true
 					self.progress = self.progress + 1
-					if self.progress >= #self.correctOrder then self.solved = true end
+					sound.play("leverPull")
+					if self.progress >= #self.correctOrder then
+						self.solved = true
+						sound.play("puzzleSolved")
+					else
+						sound.play("leverCorrect")
+					end
 				else
 					self.progress = 0
 					for _, l in ipairs(self.levers) do l.pulled = false end
+					sound.play("leverPull")
+					sound.play("puzzleWrong")
 					particles:spawnParticleEffect(p.body.x + 16, p.body.y + 16, 0, 0, {
 						count = { 10, 15 },
 						lifetime = { 0.3, 0.6 },
@@ -411,6 +425,7 @@ function love.update(dt)
 		if physics.CheckCollosionWall(p, { x = top.x, y = top.y, width = top.w, height = top.h }) then
 			p.body.x = bot.x + bot.w / 2 - TILE_SIZE / 2
 			p.body.y = bot.y + bot.h / 2 - TILE_SIZE / 2
+			sound.play("portal")
 		end
 	end
 
@@ -426,8 +441,11 @@ function love.update(dt)
 				WhiteTransition.timer = 0
 				WhiteTransition.startCamX = Game.camera.x
 				WhiteTransition.startCamY = Game.camera.y
+				sound.play("whiteShimmer")
+			else
+				sound.play("colorPickup")
 			end
-			--print("col " .. p.body.x .. " " .. p.body.y)
+			sound.updateAmbient()
 		end
 	end
 

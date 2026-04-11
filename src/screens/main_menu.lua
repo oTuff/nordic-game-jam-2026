@@ -1,4 +1,5 @@
 local menu = require("src.menu")
+local sound = require("src.sound")
 
 local main_menu = {}
 
@@ -8,6 +9,7 @@ function main_menu.init()
 			label = "Play",
 			action = function()
 				Game.currentState = GameState.playing
+				sound.updateAmbient()
 			end,
 		},
 		{
