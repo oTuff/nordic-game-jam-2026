@@ -21,6 +21,7 @@ Particles = {
     ---@field color number[]
     ---@field spread number
 
+    ---@type table Effects
     Effects = {
         explosion = {
             count = { 18, 24 },
@@ -55,7 +56,7 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
     end
 end
 
---- dont use its for internal usage. Instead use spawnParticleEffect
+--- dont use! its for internal usage. Instead use spawnParticleEffect
 function Particles:spawnParticle(x, y, xv, yv, type)
     --@type Particle (it doesnt like line below: p = {})
     local p = table.remove(self.ParticlePool)
