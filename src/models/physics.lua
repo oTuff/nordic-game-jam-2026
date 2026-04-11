@@ -33,26 +33,20 @@ end
 
 function Body:integrate(dt)
     local pixelPerSecScale = 100
-    local frictionCoeff = 2.298
+    local frictionCoeff = 12
 
     self.velx = self.velx + self.ax * dt
     self.vely = self.vely + self.ay * dt
 
+    local len = math.sqrt(self.velx * self.velx + self.vely * self.vely)
+    print(len)
+    if len > self.maxSpeed then
+        self.velx = (self.velx / len) * self.maxSpeed
+        self.vely = (self.vely / len) * self.maxSpeed
+    end
+
     self.x = self.x + self.velx * dt * pixelPerSecScale
     self.y = self.y + self.vely * dt * pixelPerSecScale
-
-    if self.velx >= self.maxSpeed then
-        self.velx = self.maxSpeed
-    end
-    if self.velx <= -self.maxSpeed then
-        self.velx = -self.maxSpeed
-    end
-    if self.vely >= self.maxSpeed then
-        self.vely = self.maxSpeed
-    end
-    if self.vely <= -self.maxSpeed then
-        self.vely = -self.maxSpeed
-    end
 
     if math.abs(self.ax) == 0 then -- add friction when not accelerating
         self.velx = self.velx - self.velx * frictionCoeff * dt

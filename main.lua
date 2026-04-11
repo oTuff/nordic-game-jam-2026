@@ -31,6 +31,7 @@ function love.load()
 	SETTINGS_FILENAME = "settings.ini"
 
 	push.setupScreen(GAME_WIDTH, GAME_HEIGHT)
+	love.graphics.setBackgroundColor(0.05, 0.05, 0.05)
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setNewFont(36)
 
@@ -180,17 +181,195 @@ function love.load()
 		},
 		---@type boolean
 		solved = false,
-		---@type Entity
-		handle = {
+		lever = {
 			x = TILE_SIZE * 42,
 			y = TILE_SIZE * 14,
 			col = "yellow",
-			sprite = Game.assets.images.handle
+			frames = Game.assets.images.lever,
+			frameIndex = 1,
+			pulled = false,
 		}
 	}
-	function YellowPuzzle.handle:update(p)
-		if (p.interact and physics.CheckCollosion(p, self)) then
-			YellowPuzzle.solved = true;
+	function YellowPuzzle.lever:update(p)
+		if self.pulled then return end
+		if p.interact and physics.CheckCollosion(p, self) then
+			self.pulled = true
+			self.frameIndex = #self.frames
+			YellowPuzzle.solved = true
+			-- Particle effect at the opened path
+			for _, block in ipairs(YellowPuzzle.yellowBlocked) do
+				particles:spawnParticleEffect(block.x + 16, block.y + 16, 0, 0, {
+					count = { 12, 18 },
+					lifetime = { 0.5, 1.0 },
+					speed = { 0.1, 0.3 },
+					size = { 4, 10 },
+					spread = 180,
+					color = { 1, 1, 0, 0.9 },
+				})
+			end
+		end
+	end
+
+	function YellowPuzzle.lever:draw()
+		love.graphics.setColor(1, 1, 0, 1)
+		local f = self.frames[self.pulled and #self.frames or 1]
+		love.graphics.draw(f.image, f.quad, self.x, self.y)
+		love.graphics.setColor(1, 1, 1, 1)
+	end
+
+	-- Darkblue portals
+	Portals = {
+		top    = { x = TILE_SIZE * 15, y = TILE_SIZE * 2, w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
+		bottom = { x = TILE_SIZE * 44, y = TILE_SIZE * 74, w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
+	}
+
+	------------------------------------------------------
+	-- Color-gated collision walls (shared infrastructure)
+	------------------------------------------------------
+	Game.colorWalls = {}
+
+	local T = TILE_SIZE
+
+	------------------------------------------------------
+	-- Puzzle 3: Color Memory Sequence (gates red)
+	------------------------------------------------------
+	local la = { x = 6, y = 40 }
+	LeverPuzzle = {
+		solved = false,
+		correctOrder = { "blue", "pink", "yellow", "brown", "lightgreen" },
+		progress = 0,
+		levers = {},
+		blockedWall = { x = T * 10, y = T * 43, width = T, height = T * 2 },
+	}
+	local leverColors = { "yellow", "blue", "lightgreen", "pink", "brown" }
+	local leverRGB = {
+		yellow = { 1, 1, 0 },
+		blue = { 0.3, 0.5, 1 },
+		lightgreen = { 0, 1, 0 },
+		pink = { 1, 0.75, 0.80 },
+		brown = { 0.60, 0.30, 0.10 },
+	}
+	for i, col in ipairs(leverColors) do
+		table.insert(LeverPuzzle.levers, {
+			x = T * (la.x + (i - 1) * 2),
+			y = T * la.y,
+			col = col,
+			pulled = false,
+			color = leverRGB[col],
+		})
+	end
+
+	function LeverPuzzle:update(p)
+		if self.solved or not UnlockedColor.values.brown then return end
+		for _, lever in ipairs(self.levers) do
+			if p.interact and not lever.pulled and physics.CheckCollosion(p, lever) then
+				if lever.col == self.correctOrder[self.progress + 1] then
+					lever.pulled = true
+					self.progress = self.progress + 1
+					if self.progress >= #self.correctOrder then self.solved = true end
+				else
+					self.progress = 0
+					for _, l in ipairs(self.levers) do l.pulled = false end
+					particles:spawnParticleEffect(p.body.x + 16, p.body.y + 16, 0, 0, {
+						count = { 10, 15 },
+						lifetime = { 0.3, 0.6 },
+						speed = { 0.1, 0.3 },
+						size = { 3, 8 },
+						spread = 180,
+						color = { 1, 0.2, 0.2, 0.8 },
+					})
+				end
+			end
+		end
+		if not self.solved then
+			if physics.CheckCollosionWall(p, self.blockedWall) then
+				physics.HandleCollisionWall(p, self.blockedWall)
+			end
+		end
+	end
+
+	function LeverPuzzle:draw()
+		if not UnlockedColor.values.brown then return end
+		local frames = Game.assets.images.lever
+		for _, lever in ipairs(self.levers) do
+			love.graphics.setColor(lever.color[1], lever.color[2], lever.color[3], 1)
+			local f = frames[lever.pulled and #frames or 1]
+			love.graphics.draw(f.image, f.quad, lever.x, lever.y)
+		end
+		if not self.solved then
+			love.graphics.setColor(0.5, 0.1, 0.1, 0.6)
+			love.graphics.rectangle("fill", self.blockedWall.x, self.blockedWall.y, self.blockedWall.width,
+				self.blockedWall.height)
+		end
+		love.graphics.setColor(1, 1, 1, 1)
+	end
+
+	------------------------------------------------------
+	-- Puzzle 4: Vine Garden (darkgreen)
+	------------------------------------------------------
+	local va = { x = 2, y = 55 }
+	VineGarden = {
+		zones = {
+			{ x = T * va.x,       y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 1 },
+			{ x = T * (va.x + 4), y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 2 },
+			{ x = T * (va.x + 2), y = T * (va.y + 6), width = T * 4, height = T * 4, active = true, id = 3 },
+		},
+		faucets = {
+			{ x = T * (va.x + 1), y = T * (va.y - 1), clearsZone = 1, used = false },
+			{ x = T * (va.x + 5), y = T * (va.y - 1), clearsZone = 2, used = false },
+			{ x = T * (va.x + 3), y = T * (va.y + 5), clearsZone = 3, used = false },
+		},
+	}
+
+	function VineGarden:update(p)
+		if not UnlockedColor.values.darkgreen then return end
+		for _, faucet in ipairs(self.faucets) do
+			if not faucet.used and p.interact and physics.CheckCollosion(p, faucet) then
+				faucet.used = true
+				for _, zone in ipairs(self.zones) do
+					if zone.id == faucet.clearsZone then
+						zone.active = false
+						particles:spawnParticleEffect(faucet.x + 16, faucet.y + 16, 0, 0, {
+							count = { 8, 12 },
+							lifetime = { 0.4, 0.8 },
+							speed = { 0.1, 0.3 },
+							size = { 3, 8 },
+							spread = 180,
+							color = { 0.2, 0.5, 1, 0.8 },
+						})
+					end
+				end
+			end
+		end
+	end
+
+	function VineGarden:isPlayerInVines(p)
+		if not UnlockedColor.values.darkgreen then return false end
+		for _, zone in ipairs(self.zones) do
+			if zone.active and physics.CheckCollosionWall(p, zone) then return true end
+		end
+		return false
+	end
+
+	function VineGarden:draw()
+		if not UnlockedColor.values.darkgreen then return end
+		for _, zone in ipairs(self.zones) do
+			if zone.active then
+				love.graphics.setColor(1, 1, 1, 0.7)
+				local img = Game.assets.images.vines
+				for tx = 0, math.floor(zone.width / T) - 1 do
+					for ty = 0, math.floor(zone.height / T) - 1 do
+						love.graphics.draw(img, zone.x + tx * T, zone.y + ty * T)
+					end
+				end
+			end
+		end
+		love.graphics.setColor(1, 1, 1, 1)
+		for _, faucet in ipairs(self.faucets) do
+			love.graphics.draw(Game.assets.images.faucet, faucet.x, faucet.y)
+			if faucet.used then
+				love.graphics.draw(Game.assets.images.water, faucet.x, faucet.y + T)
+			end
 		end
 	end
 end
@@ -256,11 +435,40 @@ function love.update(dt)
 
 	-- yellow "puzzle"
 	if not YellowPuzzle.solved then
-		YellowPuzzle.handle:update(p)
+		YellowPuzzle.lever:update(p)
 		for _, obj in pairs(YellowPuzzle.yellowBlocked) do
 			if physics.CheckCollosion(p, obj) then
 				physics.HandleCollision(p, obj)
 			end
+		end
+	end
+
+	-- Color-gated collision walls
+	for _, wall in ipairs(Game.colorWalls) do
+		if not wall.col or wall.col == "" or UnlockedColor.values[wall.col] then
+			if physics.CheckCollosionWall(p, wall) then
+				physics.HandleCollisionWall(p, wall)
+			end
+		end
+	end
+
+	-- Puzzle updates
+	LeverPuzzle:update(p)
+	VineGarden:update(p)
+
+	-- Vine speed debuff
+	if VineGarden:isPlayerInVines(p) then
+		p.body.velx = p.body.velx * 0.3
+		p.body.vely = p.body.vely * 0.3
+	end
+
+	-- Darkblue portal (one-way: top -> bottom)
+	if UnlockedColor.values.darkblue then
+		local top = Portals.top
+		local bot = Portals.bottom
+		if physics.CheckCollosionWall(p, { x = top.x, y = top.y, width = top.w, height = top.h }) then
+			p.body.x = bot.x + bot.w / 2 - TILE_SIZE / 2
+			p.body.y = bot.y + bot.h / 2 - TILE_SIZE / 2
 		end
 	end
 
@@ -318,7 +526,7 @@ function love.draw()
 		--Gamemap:drawLayer(Gamemap.layers["main"])
 
 		if UnlockedColor.values["yellow"] then
-			love.graphics.draw(YellowPuzzle.handle.sprite, YellowPuzzle.handle.x, YellowPuzzle.handle.y)
+			YellowPuzzle.lever:draw()
 		end
 
 		for _, color in pairs(UnlockedColor.order) do
@@ -328,6 +536,24 @@ function love.draw()
 		end
 
 		love.graphics.setScissor(sx, sy, sw, sh)
+
+		-- Draw color-gated walls
+		local wallColors = {
+			lightgreen = { 0, 0.8, 0 },
+			pink = { 1, 0.75, 0.80 },
+		}
+		for _, wall in ipairs(Game.colorWalls) do
+			if wall.col and UnlockedColor.values[wall.col] then
+				local c = wallColors[wall.col] or { 0.5, 0.5, 0.5 }
+				love.graphics.setColor(c[1], c[2], c[3], 0.8)
+				love.graphics.rectangle("fill", wall.x, wall.y, wall.width, wall.height)
+			end
+		end
+		love.graphics.setColor(1, 1, 1, 1)
+
+		-- Draw puzzles
+		LeverPuzzle:draw()
+		VineGarden:draw()
 
 		local p = Game.player
 		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
