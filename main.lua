@@ -311,7 +311,6 @@ function love.load()
 		end
 		love.graphics.setColor(1, 1, 1, 1)
 	end
-
 end
 
 -- Screen dispatch tables
