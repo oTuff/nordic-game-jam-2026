@@ -85,7 +85,6 @@ physics.CheckCollosionWall = function(a, b)
     return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
 end
 
----@return boolean
 ---@param a Player
 ---@param b any
 physics.HandleCollisionWall = function(a, b)
