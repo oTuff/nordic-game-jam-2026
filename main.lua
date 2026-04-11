@@ -31,7 +31,6 @@ function love.load()
 	SETTINGS_FILENAME = "settings.ini"
 
 	push.setupScreen(GAME_WIDTH, GAME_HEIGHT)
-	love.graphics.setBackgroundColor(0.02, 0.02, 0.02)
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setNewFont(36)
 
@@ -166,15 +165,9 @@ function love.load()
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
 			col = "yellow",
-			x = value.x - TILE_SIZE * 2 - 8,
-			y = value.y - TILE_SIZE * 6,
+			x = value.x,
+			y = value.y - TILE_SIZE,
 			sprite = Game.assets.images.tree
-		})
-		table.insert(Game.objects, {
-			col = "lightgreen",
-			x = value.x - TILE_SIZE * 2 - 8,
-			y = value.y - TILE_SIZE * 6,
-			sprite = Game.assets.images.leaves1
 		})
 	end
 
@@ -187,45 +180,19 @@ function love.load()
 		},
 		---@type boolean
 		solved = false,
+		---@type Entity
 		handle = {
 			x = TILE_SIZE * 42,
 			y = TILE_SIZE * 14,
 			col = "yellow",
-			frames = Game.assets.images.handle,
-			frameIndex = 1,
-			frameTimer = 0,
-			animating = false,
+			sprite = Game.assets.images.handle
 		}
 	}
 	function YellowPuzzle.handle:update(p)
-		if self.animating then
-			self.frameTimer = self.frameTimer + love.timer.getDelta()
-			if self.frameTimer >= 0.15 then
-				self.frameTimer = self.frameTimer - 0.15
-				if self.frameIndex < #self.frames then
-					self.frameIndex = self.frameIndex + 1
-				else
-					self.animating = false
-					YellowPuzzle.solved = true
-				end
-			end
-		elseif p.interact and physics.CheckCollosion(p, self) then
-			self.animating = true
-			self.frameIndex = 1
-			self.frameTimer = 0
+		if (p.interact and physics.CheckCollosion(p, self)) then
+			YellowPuzzle.solved = true;
 		end
 	end
-
-	function YellowPuzzle.handle:draw()
-		local f = self.frames[self.frameIndex]
-		love.graphics.draw(f.image, f.quad, self.x, self.y)
-	end
-
-	-- Darkblue portals
-	Portals = {
-		top    = { x = TILE_SIZE * 15, y = TILE_SIZE * 2,  w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
-		bottom = { x = TILE_SIZE * 44, y = TILE_SIZE * 74, w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
-	}
 end
 
 -- Screen dispatch tables
@@ -297,16 +264,6 @@ function love.update(dt)
 		end
 	end
 
-	-- Darkblue portal (one-way: top -> bottom)
-	if UnlockedColor.values.darkblue then
-		local top = Portals.top
-		local bot = Portals.bottom
-		if physics.CheckCollosionWall(p, { x = top.x, y = top.y, width = top.w, height = top.h }) then
-			p.body.x = bot.x + bot.w / 2 - TILE_SIZE / 2
-			p.body.y = bot.y + bot.h / 2 - TILE_SIZE / 2
-		end
-	end
-
 	for index, obj in ipairs(Game.unlocks) do
 		if physics.CheckCollosion(p, obj) then
 			local type = particles.Effects.explosion
@@ -361,7 +318,7 @@ function love.draw()
 		--Gamemap:drawLayer(Gamemap.layers["main"])
 
 		if UnlockedColor.values["yellow"] then
-			YellowPuzzle.handle:draw()
+			love.graphics.draw(YellowPuzzle.handle.sprite, YellowPuzzle.handle.x, YellowPuzzle.handle.y)
 		end
 
 		for _, color in pairs(UnlockedColor.order) do
@@ -373,8 +330,9 @@ function love.draw()
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		local p = Game.player
-		love.graphics.setColor(1, 1, 1, 1)
-		p:draw()
+		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
+		love.graphics.setColor(0.1, 0.1, 0.1)
+		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
 
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
