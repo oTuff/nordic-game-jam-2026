@@ -5,6 +5,8 @@ local player = require("src.models.player")
 local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
+local particles = require("src.models.particles")
+local walls = require("assets.tield.rgb")
 
 local main_menu = require("src.screens.main_menu")
 local pause_menu = require("src.screens.pause_menu")
@@ -185,7 +187,6 @@ function love.update(dt)
 	if Game.currentState ~= GameState.playing then return end
 
 	local p = Game.player
-
 	p:update(dt)
 
 	for _, obj in ipairs(Game.objects) do
@@ -194,13 +195,22 @@ function love.update(dt)
 		end
 	end
 
+	for _, wall in pairs(walls.layers[4].objects) do
+		if physics.CheckCollosionWall(p, wall) then
+			physics.HandleCollisionWall(p, wall)
+		end
+	end
+
 	for index, obj in ipairs(Game.unlocks) do
 		if physics.CheckCollosion(p, obj) then
+			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, particles.Effects.explosion)
 			table.remove(Game.unlocks, index)
 			UnlockedColor[obj.col] = true
 			print("col " .. p.body.x .. " " .. p.body.y)
 		end
 	end
+
+	particles:update(dt)
 
 	-- Camera
 	local cam = Game.camera
@@ -236,13 +246,11 @@ function love.draw()
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
-
 		for key, value in pairs(UnlockedColor) do
 			if value then
 				Gamemap:drawLayer(Gamemap.layers[key], cx, cy)
 			end
 		end
-
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		love.graphics.push()
@@ -256,7 +264,6 @@ function love.draw()
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
 			love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
-			--love.graphics.draw(obj.sprite, obj.x, obj.y)
 		end
 
 		for _, obj in ipairs(Game.objects) do
@@ -265,6 +272,8 @@ function love.draw()
 				love.graphics.draw(obj.sprite, obj.x, obj.y)
 			end
 		end
+
+		particles:draw()
 
 		love.graphics.pop()
 

@@ -2,6 +2,7 @@ local physics = require("src.models.physics")
 
 ---@class Player: Object
 ---@field body Body
+---@field sprite love.Image
 local Player = {}
 Player.__index = Player
 
