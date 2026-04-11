@@ -310,74 +310,6 @@ function love.load()
 		love.graphics.setColor(1, 1, 1, 1)
 	end
 
-	------------------------------------------------------
-	-- Puzzle 4: Vine Garden (darkgreen)
-	------------------------------------------------------
-	local va = { x = 2, y = 55 }
-	VineGarden = {
-		zones = {
-			{ x = T * va.x,       y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 1 },
-			{ x = T * (va.x + 4), y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 2 },
-			{ x = T * (va.x + 2), y = T * (va.y + 6), width = T * 4, height = T * 4, active = true, id = 3 },
-		},
-		faucets = {
-			{ x = T * (va.x + 1), y = T * (va.y - 1), clearsZone = 1, used = false },
-			{ x = T * (va.x + 5), y = T * (va.y - 1), clearsZone = 2, used = false },
-			{ x = T * (va.x + 3), y = T * (va.y + 5), clearsZone = 3, used = false },
-		},
-	}
-
-	function VineGarden:update(p)
-		if not UnlockedColor.values.darkgreen then return end
-		for _, faucet in ipairs(self.faucets) do
-			if not faucet.used and p.interact and physics.CheckCollosion(p, faucet) then
-				faucet.used = true
-				for _, zone in ipairs(self.zones) do
-					if zone.id == faucet.clearsZone then
-						zone.active = false
-						particles:spawnParticleEffect(faucet.x + 16, faucet.y + 16, 0, 0, {
-							count = { 8, 12 },
-							lifetime = { 0.4, 0.8 },
-							speed = { 0.1, 0.3 },
-							size = { 3, 8 },
-							spread = 180,
-							color = { 0.2, 0.5, 1, 0.8 },
-						})
-					end
-				end
-			end
-		end
-	end
-
-	function VineGarden:isPlayerInVines(p)
-		if not UnlockedColor.values.darkgreen then return false end
-		for _, zone in ipairs(self.zones) do
-			if zone.active and physics.CheckCollosionWall(p, zone) then return true end
-		end
-		return false
-	end
-
-	function VineGarden:draw()
-		if not UnlockedColor.values.darkgreen then return end
-		for _, zone in ipairs(self.zones) do
-			if zone.active then
-				love.graphics.setColor(1, 1, 1, 0.7)
-				local img = Game.assets.images.vines
-				for tx = 0, math.floor(zone.width / T) - 1 do
-					for ty = 0, math.floor(zone.height / T) - 1 do
-						love.graphics.draw(img, zone.x + tx * T, zone.y + ty * T)
-					end
-				end
-			end
-		end
-		love.graphics.setColor(1, 1, 1, 1)
-		for _, faucet in ipairs(self.faucets) do
-			love.graphics.draw(Game.assets.images.faucet, faucet.x, faucet.y)
-			if faucet.used then
-				love.graphics.draw(Game.assets.images.water, faucet.x, faucet.y + T)
-			end
-		end
-	end
 end
 
 -- Screen dispatch tables
@@ -460,14 +392,6 @@ function love.update(dt)
 
 	-- Puzzle updates
 	LeverPuzzle:update(p)
-	VineGarden:update(p)
-
-	-- Vine speed debuff
-	if VineGarden:isPlayerInVines(p) then
-		p.body.velx = p.body.velx * 0.3
-		p.body.vely = p.body.vely * 0.3
-	end
-
 	-- Darkblue portal (one-way: top -> bottom)
 	if UnlockedColor.values.darkblue then
 		local top = Portals.top
@@ -554,7 +478,6 @@ function love.draw()
 
 		-- Draw puzzles
 		LeverPuzzle:draw()
-		VineGarden:draw()
 
 		local p = Game.player
 		p:draw()
