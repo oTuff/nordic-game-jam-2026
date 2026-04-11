@@ -103,14 +103,17 @@ function love.load()
 	end
 
 	UnlockedColor = {
-		red = false,
-		lightgreen = false,
-		blue = false,
-		yellow = false,
-		pink = false,
-		brown = false,
-		darkgreen = false,
-		darkblue = false
+		order = { "yellow", "blue", "lightgreen", "pink", "brown", "red", "darkgreen", "darkblue" },
+		values = {
+			yellow = false,
+			blue = false,
+			lightgreen = false,
+			pink = false,
+			brown = false,
+			red = false,
+			darkgreen = false,
+			darkblue = false
+		}
 	}
 
 	-- Apply saved video settings
@@ -144,9 +147,9 @@ function love.load()
 	Game.player = player.new(100, 100)
 	--- @type Unlocks[]
 	Game.unlocks = {
-		{ col = "red",        x = TILE_SIZE * 10, y = TILE_SIZE * 44, color = { 1, 0, 0, 1 } }, -- red 1
-		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 } }, -- green 2
-		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 } }, -- blue 3
+		{ col = "red",        x = TILE_SIZE * 10, y = TILE_SIZE * 44, color = { 1, 0, 0, 1 } }, -- red
+		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 } }, -- blue
+		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 } }, -- green
 		{ col = "yellow",     x = TILE_SIZE * 11, y = TILE_SIZE * 20, color = { 1, 1, 0, 1 } }
 	}
 	--- @type Entity[]
@@ -213,7 +216,7 @@ function love.update(dt)
 			type.color = obj.color -- TODO maybe randomize color a bit
 			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, type)
 			table.remove(Game.unlocks, index)
-			UnlockedColor[obj.col] = true
+			UnlockedColor.values[obj.col] = true
 			--print("col " .. p.body.x .. " " .. p.body.y)
 		end
 	end
@@ -258,13 +261,14 @@ function love.draw()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
 
-		Gamemap:drawLayer(Gamemap.layers["main"])
+		--Gamemap:drawLayer(Gamemap.layers["main"])
 
-		for key, value in pairs(UnlockedColor) do
-			if value then
-				Gamemap:drawLayer(Gamemap.layers[key])
+		for _, color in pairs(UnlockedColor.order) do
+			if UnlockedColor.values[color] then
+				Gamemap:drawLayer(Gamemap.layers[color])
 			end
 		end
+
 		love.graphics.setScissor(sx, sy, sw, sh)
 
 		local p = Game.player
