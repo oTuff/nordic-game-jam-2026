@@ -2,7 +2,7 @@
 # Build game: {love|web|linux|windows|macos|all}
 set -eu
 
-GAME_NAME="SuperGame"
+GAME_NAME="TBD Game"
 LOVE_VERSION="11.5"
 BUILD_DIR="build"
 BIN_DIR="bin"
