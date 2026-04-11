@@ -27,6 +27,10 @@ return {
 				leaves1 = love.graphics.newImage("assets/images/leaves.png"),
 				blackcat_idle = loadVariants("blackcat_idle_", 32, 32),
 				blackcat_walk = loadVariants("blackcat_walk_", 32, 32),
+				lever = loadSheet("assets/images/lever.png", 32, 32),
+				faucet = love.graphics.newImage("assets/images/faucet.png"),
+				vines = love.graphics.newImage("assets/images/vines.png"),
+				water = love.graphics.newImage("assets/images/water.png"),
 			},
 			fonts = {
 			},

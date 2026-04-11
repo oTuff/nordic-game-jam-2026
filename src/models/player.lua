@@ -6,8 +6,8 @@ local physics = require("src.models.physics")
 local Player = {}
 Player.__index = Player
 
-local WALK_FPS = 1 / 0.150  -- 150ms per frame
-local IDLE_FPS = 1 / 0.300  -- 300ms per frame
+local WALK_FPS = 1 / 0.150 -- 150ms per frame
+local IDLE_FPS = 1 / 0.300 -- 300ms per frame
 
 -- Determines which sprite variant to use based on collected colors.
 -- Matches the progression: 0=none, 1=yellow, 2=+blue, 3=+lightgreen,
@@ -29,8 +29,10 @@ local function getSpriteVariant()
 	if hasRed and hasGreen then
 		if u.darkblue then return "8" end
 		return "7"
-	elseif hasRed then return "6a"
-	elseif hasGreen then return "6b"
+	elseif hasRed then
+		return "6a"
+	elseif hasGreen then
+		return "6b"
 	end
 
 	return "5"
@@ -71,25 +73,29 @@ function Player:update(dt)
 	end
 
 	local moving = false
+	local dirx = 0
+	local diry = 0
 
-	if isDown(kb.jump, gp.jump) then
-		self.body:addForce(0, -3)
+	if isDown(kb.move_down, gp.move_down) then
+		diry = diry + 11
 		moving = true
 	end
-	if isDown(kb.move_down, gp.move_down) then
-		self.body:addForce(0, 3)
+	if isDown(kb.jump, gp.jump) then
+		diry = diry - 11
 		moving = true
 	end
 	if isDown(kb.move_right, gp.move_right) then
-		self.body:addForce(3, 0)
+		dirx = dirx + 11
 		moving = true
 		self.facingLeft = false
 	end
 	if isDown(kb.move_left, gp.move_left) then
-		self.body:addForce(-3, 0)
+		dirx = dirx - 11
 		moving = true
 		self.facingLeft = true
 	end
+
+	self.body:addForce(dirx, diry)
 
 	-- reset frame on state change
 	if moving ~= self.moving then
