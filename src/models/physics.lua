@@ -68,6 +68,47 @@ function Body:integrate(dt)
     end
 end
 
+--- check collison on player vs wall (box)
+---@return boolean
+---@param a Player
+---@param b any
+physics.CheckCollosionWall = function(a, b)
+    local ax = a.body.x
+    local ay = a.body.y
+    local ax2 = a.body.x + TILE_SIZE
+    local ay2 = a.body.y + TILE_SIZE
+
+    local bx = b.x
+    local by = b.y
+    local bx2 = b.x + b.width
+    local by2 = b.y + b.height
+    return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
+end
+
+---@return boolean
+---@param a Player
+---@param b any
+physics.HandleCollisionWall = function(a, b)
+    local overlapX = math.min(a.body.x + TILE_SIZE - b.x, b.x + b.width - a.body.x)
+    local overlapY = math.min(a.body.y + TILE_SIZE - b.y, b.y + b.height - a.body.y)
+
+    if overlapX < overlapY then
+        if a.body.x < b.x then
+            a.body.x = a.body.x - overlapX
+        else
+            a.body.x = a.body.x + overlapX
+        end
+        a.body.velx = 0
+    else
+        if a.body.y < b.y then
+            a.body.y = a.body.y - overlapY
+        else
+            a.body.y = a.body.y + overlapY
+        end
+        a.body.vely = 0
+    end
+end
+
 --- check collison on player vs objects (box)
 ---@return boolean
 ---@param a Player
@@ -82,7 +123,6 @@ physics.CheckCollosion = function(a, b)
     local by = b.y
     local bx2 = b.x + TILE_SIZE
     local by2 = b.y + TILE_SIZE
-
     return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
 end
 

@@ -6,6 +6,7 @@ local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
 local particles = require("src.models.particles")
+local walls = require("assets.tield.rgb")
 
 local main_menu = require("src.screens.main_menu")
 local pause_menu = require("src.screens.pause_menu")
@@ -191,6 +192,12 @@ function love.update(dt)
 	for _, obj in ipairs(Game.objects) do
 		if obj.update then
 			obj:update(dt) -- only for objects to update
+		end
+	end
+
+	for _, wall in pairs(walls.layers[4].objects) do
+		if physics.CheckCollosionWall(p, wall) then
+			physics.HandleCollisionWall(p, wall)
 		end
 	end
 
