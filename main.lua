@@ -165,9 +165,15 @@ function love.load()
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
 			col = "yellow",
-			x = value.x,
-			y = value.y - TILE_SIZE,
+			x = value.x - TILE_SIZE * 2 - 8,
+			y = value.y - TILE_SIZE * 6,
 			sprite = Game.assets.images.tree
+		})
+		table.insert(Game.objects, {
+			col = "lightgreen",
+			x = value.x - TILE_SIZE * 2 - 8,
+			y = value.y - TILE_SIZE * 6,
+			sprite = Game.assets.images.leaves1
 		})
 	end
 
