@@ -13,7 +13,8 @@ local keybind_menu = {
 
 -- The action names and display labels (order matters for drawing)
 local actions = {
-	{ key = "jump",       label = "Jump" },
+	{ key = "interact",   label = "interact" },
+	{ key = "jump",       label = "jump" },
 	{ key = "move_left",  label = "Move Left" },
 	{ key = "move_right", label = "Move Right" },
 	{ key = "move_down",  label = "Move Down" },

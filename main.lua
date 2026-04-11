@@ -60,15 +60,17 @@ function love.load()
 	-- Read settings
 	local defaults = {
 		controls = {
+			interact = "e",
 			move_left = "a",
 			move_right = "d",
 			jump = "w",
 			move_down = "s",
 		},
 		gamepad = {
+			interact = "a",
 			move_left = "dpleft",
 			move_right = "dpright",
-			jump = "a",
+			jump = "dpup",
 			move_down = "dpdown",
 		},
 		video = {
@@ -160,6 +162,29 @@ function love.load()
 	Game.objects = {
 		{ col = "red", x = 300, y = 300, sprite = Game.assets.images.test }
 	}
+
+	YellowPuzzle = {
+		-- yellow puzzle
+		---@type Object[]
+		yellowBlocked = {
+			{ x = TILE_SIZE * 40, y = TILE_SIZE * 16, col = "" },
+			{ x = TILE_SIZE * 41, y = TILE_SIZE * 16, col = "" }
+		},
+		---@type boolean
+		solved = false,
+		---@type Entity
+		handle = {
+			x = TILE_SIZE * 42,
+			y = TILE_SIZE * 14,
+			col = "yellow",
+			sprite = Game.assets.images.handle
+		}
+	}
+	function YellowPuzzle.handle:update(p)
+		if (p.interact and physics.CheckCollosion(p, self)) then
+			YellowPuzzle.solved = true;
+		end
+	end
 end
 
 -- Screen dispatch tables
@@ -204,13 +229,23 @@ function love.update(dt)
 
 	for _, obj in ipairs(Game.objects) do
 		if obj.update then
-			obj:update(dt) -- only for objects to update
+			obj:update(p) -- only for objects to update
 		end
 	end
 
 	for _, wall in pairs(walls.layers[2].objects) do
 		if physics.CheckCollosionWall(p, wall) then
 			physics.HandleCollisionWall(p, wall)
+		end
+	end
+
+	-- yellow "puzzle"
+	if not YellowPuzzle.solved then
+		YellowPuzzle.handle:update(p)
+		for _, obj in pairs(YellowPuzzle.yellowBlocked) do
+			if physics.CheckCollosion(p, obj) then
+				physics.HandleCollision(p, obj)
+			end
 		end
 	end
 
@@ -266,6 +301,10 @@ function love.draw()
 		love.graphics.setColor(1, 1, 1, 1)
 
 		--Gamemap:drawLayer(Gamemap.layers["main"])
+
+		if UnlockedColor.values["yellow"] then
+			love.graphics.draw(YellowPuzzle.handle.sprite, YellowPuzzle.handle.x, YellowPuzzle.handle.y)
+		end
 
 		for _, color in pairs(UnlockedColor.order) do
 			if UnlockedColor.values[color] then

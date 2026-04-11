@@ -3,6 +3,7 @@ local physics = require("src.models.physics")
 ---@class Player: Object
 ---@field body Body
 ---@field sprite love.Image
+---@field interact boolean
 local Player = {}
 Player.__index = Player
 
@@ -12,6 +13,7 @@ Player.__index = Player
 ---@return Player
 function Player.new(x, y, spriteOverwrite)
 	local self = setmetatable({}, Player)
+	self.interact = false;
 	self.body = physics.Body.new(x, y)
 	self.sprite = spriteOverwrite or Game.assets.images.playerImg
 	return self
@@ -27,6 +29,12 @@ function Player:update(dt)
 		if love.keyboard.isScancodeDown(kb_bind) then return true end
 		if joystick and gp_bind ~= "" and joystick:isGamepadDown(gp_bind) then return true end
 		return false
+	end
+
+	if isDown(kb.interact, gp.interact) then
+		self.interact = true;
+	else
+		self.interact = false;
 	end
 
 	if isDown(kb.jump, gp.jump) then
