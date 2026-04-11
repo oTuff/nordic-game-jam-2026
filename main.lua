@@ -524,9 +524,6 @@ function love.draw()
 		love.graphics.push()
 		love.graphics.translate(cx, cy)
 
-		-- Fix push working with sti
-		local sx, sy, sw, sh = love.graphics.getScissor()
-		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
 
 		--Gamemap:drawLayer(Gamemap.layers["main"])
@@ -540,8 +537,6 @@ function love.draw()
 				Gamemap:drawLayer(Gamemap.layers[color])
 			end
 		end
-
-		love.graphics.setScissor(sx, sy, sw, sh)
 
 		-- Draw color-gated walls
 		local wallColors = {
