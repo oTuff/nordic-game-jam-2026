@@ -236,6 +236,7 @@ function love.load()
 					size = { 4, 10 },
 					spread = 180,
 					color = { 1, 1, 0, 0.9 },
+					offset = 32,
 				})
 			end
 		end
@@ -316,6 +317,7 @@ function love.load()
 						size = { 3, 8 },
 						spread = 180,
 						color = { 1, 0.2, 0.2, 0.8 },
+						offset = 32,
 					})
 				end
 			end
@@ -380,6 +382,7 @@ local screen_gamepadpressed = {
 	paused = function(button) pause_menu.gamepadpressed(button) end,
 }
 
+local portaleffecttimer = 0.5
 ---@param dt number
 function love.update(dt)
 	-- Ambient fades must run regardless of game state
@@ -394,6 +397,14 @@ function love.update(dt)
 		if obj.update then
 			obj:update(p) -- only for objects to update
 		end
+	end
+
+	portaleffecttimer = portaleffecttimer - dt
+	if UnlockedColor.values.darkblue and portaleffecttimer <= 0 then
+		local type = Particles.Effects.portal
+		particles:spawnParticleEffect(TILE_SIZE * 17.2, TILE_SIZE * 5, 0, 0, type)
+		particles:spawnParticleEffect(TILE_SIZE * 46.2, TILE_SIZE * 77, 0, 0, type)
+		portaleffecttimer = (love.math.random() * (0.6 - 0.3) + 0.3)
 	end
 
 	-- tree collision
