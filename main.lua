@@ -66,14 +66,14 @@ function love.load()
 			interact = "e",
 			move_left = "a",
 			move_right = "d",
-			jump = "w",
+			move_up = "w",
 			move_down = "s",
 		},
 		gamepad = {
 			interact = "a",
 			move_left = "dpleft",
 			move_right = "dpright",
-			jump = "dpup",
+			move_up = "dpup",
 			move_down = "dpdown",
 		},
 		video = {

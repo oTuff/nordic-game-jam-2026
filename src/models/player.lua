@@ -80,7 +80,7 @@ function Player:update(dt)
 		diry = diry + 11
 		moving = true
 	end
-	if isDown(kb.jump, gp.jump) then
+	if isDown(kb.move_up, gp.move_up) then
 		diry = diry - 11
 		moving = true
 	end
