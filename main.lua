@@ -574,7 +574,7 @@ function love.draw()
 
 	if WhiteTransition.active then
 		local fadeT = (WhiteTransition.timer - WhiteTransition.fadeDelay) /
-		    (WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
+			(WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
 		fadeT = math.max(0, math.min(fadeT, 1))
 		if fadeT > 0 then
 			love.graphics.setColor(1, 1, 1, fadeT)
