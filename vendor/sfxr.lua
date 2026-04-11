@@ -27,7 +27,25 @@ together with the *awesome* [LÖVE](https://love2d.org) game framework.
 ]] --
 -- @module sfxr
 local sfxr = {}
-local bit = bit32 or require("bit")
+local bit = bit32 or (function()
+	local ok, b = pcall(require, "bit")
+	if ok then return b end
+	local floor = math.floor
+	return {
+		band = function(a, b)
+			a, b = a % 0x100000000, b % 0x100000000
+			local r, p = 0, 1
+			for _ = 1, 32 do
+				if a % 2 == 1 and b % 2 == 1 then r = r + p end
+				a, b, p = floor(a / 2), floor(b / 2), p * 2
+			end
+			return r
+		end,
+		rshift = function(a, n)
+			return floor((a % 0x100000000) / 2^n)
+		end,
+	}
+end)()
 
 -- Constants
 
