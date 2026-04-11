@@ -6,6 +6,9 @@
   "workspace": {
     "library": [
       "${3rd}/love2d/library"
+    ],
+    "ignoreDir": [
+      "vendor/sfxr.lua"
     ]
   },
   "diagnostics.globals": [

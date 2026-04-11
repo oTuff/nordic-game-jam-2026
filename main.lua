@@ -373,6 +373,9 @@ local screen_gamepadpressed = {
 
 ---@param dt number
 function love.update(dt)
+	-- Ambient fades must run regardless of game state
+	sound.update(dt)
+
 	if Game.currentState ~= GameState.playing then return end
 
 	local p = Game.player

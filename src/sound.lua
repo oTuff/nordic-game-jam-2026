@@ -180,42 +180,66 @@ local function makeWhiteShimmer()
 end
 
 ------------------------------------------------------
--- Ambient layers: each unlocked color adds a tone
--- These are gentle, looping sine/noise pads
+-- Ambient drones: procedurally generated looping
+-- buffers using raw SoundData and sine waves.
 ------------------------------------------------------
 
-local function makeAmbientTone(freq, vol, waveform, attack, sustain, decay, vibratoDepth, vibratoSpeed)
-    local s = sfxr.newSound()
-    s:resetParameters()
-    s.waveform = waveform or sfxr.WAVEFORM.SINE
-    s.envelope.attack = attack or 0.5
-    s.envelope.sustain = sustain or 1.0
-    s.envelope.decay = decay or 0.8
-    s.frequency.start = freq or 0.2
-    s.vibrato.depth = vibratoDepth or 0.02
-    s.vibrato.speed = vibratoSpeed or 0.15
-    s.lowpass.cutoff = 0.8
-    s.volume.master = vol or 0.15
-    s.volume.sound = 0.3
-    s:sanitizeParameters()
+local SAMPLE_RATE = 44100
+local DRONE_SECONDS = 4
 
-    local data = s:generateSoundData()
+local function makeDrone(def)
+    local numSamples = SAMPLE_RATE * DRONE_SECONDS
+    -- Use LÖVE's default format (same way sfxr does it internally)
+    local data = love.sound.newSoundData(numSamples, SAMPLE_RATE, 16, 1)
+    local pi2 = math.pi * 2
+
+    for i = 0, numSamples - 1 do
+        local t = i / SAMPLE_RATE
+        local sample = 0
+
+        -- Base tone
+        sample = sample + math.sin(pi2 * def.hz * t) * 0.4
+        -- Detuned second voice for warmth
+        sample = sample + math.sin(pi2 * def.hz * 1.002 * t) * 0.25
+        -- Soft octave below
+        sample = sample + math.sin(pi2 * def.hz * 0.5 * t) * 0.15
+        -- Fifth above
+        if def.fifth then
+            sample = sample + math.sin(pi2 * def.hz * 1.498 * t) * 0.08
+        end
+
+        -- Slow breathing amplitude modulation
+        local breathRate = def.breathRate or 0.15
+        local breathDepth = def.breathDepth or 0.3
+        local breath = 1.0 - breathDepth * (0.5 + 0.5 * math.sin(pi2 * breathRate * t))
+        sample = sample * breath
+
+        -- Crossfade loop edges
+        local fadeLen = 0.05 * SAMPLE_RATE
+        if i < fadeLen then
+            sample = sample * (i / fadeLen)
+        elseif i > numSamples - fadeLen then
+            sample = sample * ((numSamples - i) / fadeLen)
+        end
+
+        data:setSample(i, math.max(-1, math.min(1, sample)))
+    end
+
     local source = love.audio.newSource(data, "static")
     source:setLooping(true)
-    source:setVolume(vol or 0.15)
+    source:setVolume(def.vol)
     return source
 end
 
--- Each ambient layer: soft, different pitch/character, increasingly lush
 local ambientDefs = {
-    darkgreen  = { freq = 0.08, vol = 0.06, wave = sfxr.WAVEFORM.SINE,     atk = 0.8, sus = 1.0, dec = 0.9, vdep = 0.01, vspd = 0.08 },
-    yellow     = { freq = 0.12, vol = 0.06, wave = sfxr.WAVEFORM.SINE,     atk = 0.7, sus = 1.0, dec = 0.8, vdep = 0.02, vspd = 0.10 },
-    blue       = { freq = 0.15, vol = 0.05, wave = sfxr.WAVEFORM.SINE,     atk = 0.6, sus = 1.0, dec = 0.9, vdep = 0.03, vspd = 0.12 },
-    lightgreen = { freq = 0.18, vol = 0.05, wave = sfxr.WAVEFORM.SINE,     atk = 0.7, sus = 1.0, dec = 0.8, vdep = 0.02, vspd = 0.15 },
-    pink       = { freq = 0.22, vol = 0.05, wave = sfxr.WAVEFORM.SINE,     atk = 0.6, sus = 1.0, dec = 0.9, vdep = 0.04, vspd = 0.10 },
-    brown      = { freq = 0.10, vol = 0.04, wave = sfxr.WAVEFORM.SAWTOOTH, atk = 0.8, sus = 1.0, dec = 0.9, vdep = 0.01, vspd = 0.06 },
-    red        = { freq = 0.25, vol = 0.05, wave = sfxr.WAVEFORM.SINE,     atk = 0.5, sus = 1.0, dec = 0.8, vdep = 0.03, vspd = 0.18 },
-    darkblue   = { freq = 0.30, vol = 0.05, wave = sfxr.WAVEFORM.SINE,     atk = 0.6, sus = 1.0, dec = 0.9, vdep = 0.05, vspd = 0.12 },
+    darkgreen  = { hz = 174.6, vol = 0.35, breathRate = 0.12, breathDepth = 0.35, fifth = false },  -- F3
+    yellow     = { hz = 196.0, vol = 0.30, breathRate = 0.15, breathDepth = 0.30, fifth = false },  -- G3
+    blue       = { hz = 220.0, vol = 0.28, breathRate = 0.10, breathDepth = 0.25, fifth = true },   -- A3
+    lightgreen = { hz = 261.6, vol = 0.25, breathRate = 0.18, breathDepth = 0.30, fifth = false },  -- C4
+    pink       = { hz = 293.7, vol = 0.25, breathRate = 0.14, breathDepth = 0.25, fifth = true },   -- D4
+    brown      = { hz = 164.8, vol = 0.30, breathRate = 0.08, breathDepth = 0.40, fifth = false },  -- E3
+    red        = { hz = 329.6, vol = 0.22, breathRate = 0.20, breathDepth = 0.20, fifth = true },   -- E4
+    darkblue   = { hz = 392.0, vol = 0.20, breathRate = 0.16, breathDepth = 0.25, fifth = true },   -- G4
 }
 
 ------------------------------------------------------
@@ -223,7 +247,6 @@ local ambientDefs = {
 ------------------------------------------------------
 
 function Sound.init()
-    -- One-shot SFX
     Sound.sfx = {
         colorPickup   = makeColorPickup(),
         leverPull     = makeLeverPull(),
@@ -236,17 +259,18 @@ function Sound.init()
         whiteShimmer  = makeWhiteShimmer(),
     }
 
-    -- Ambient layers (keyed by color name)
     Sound.ambient = {}
     for color, def in pairs(ambientDefs) do
-        Sound.ambient[color] = makeAmbientTone(def.freq, def.vol, def.wave, def.atk, def.sus, def.dec, def.vdep, def.vspd)
+        Sound.ambient[color] = {
+            source = makeDrone(def),
+            targetVol = def.vol,
+            active = false,
+        }
     end
 
-    -- Track which ambient layers are active
-    Sound.activeAmbient = {}
 end
 
---- Play a one-shot sound effect (restarts if already playing)
+--- Play a one-shot sound effect
 function Sound.play(name)
     if not Sound.sfx then return end
     local src = Sound.sfx[name]
@@ -256,18 +280,17 @@ function Sound.play(name)
     end
 end
 
---- Start an ambient layer for the given color (if not already playing)
+--- Start a drone for the given color
 function Sound.startAmbient(color)
     if not Sound.ambient then return end
-    if Sound.activeAmbient[color] then return end
-    local src = Sound.ambient[color]
-    if src then
-        src:play()
-        Sound.activeAmbient[color] = true
-    end
+    local drone = Sound.ambient[color]
+    if not drone or drone.active then return end
+    drone.active = true
+    drone.source:setVolume(drone.targetVol)
+    drone.source:play()
 end
 
---- Update ambient layers based on currently unlocked colors
+--- Activate drones for all unlocked colors
 function Sound.updateAmbient()
     for color, _ in pairs(ambientDefs) do
         if UnlockedColor.values[color] then
@@ -276,12 +299,18 @@ function Sound.updateAmbient()
     end
 end
 
---- Stop all ambient layers (e.g. when returning to menu)
+--- No-op for now (fade logic removed to debug)
+function Sound.update(dt)
+end
+
+--- Stop all ambient drones
 function Sound.stopAllAmbient()
     if not Sound.ambient then return end
-    for color, src in pairs(Sound.ambient) do
-        src:stop()
-        Sound.activeAmbient[color] = false
+    for color, drone in pairs(Sound.ambient) do
+        if drone.active then
+            drone.source:stop()
+            drone.active = false
+        end
     end
 end
 
