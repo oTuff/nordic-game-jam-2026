@@ -214,6 +214,12 @@ function love.load()
 		local f = self.frames[self.frameIndex]
 		love.graphics.draw(f.image, f.quad, self.x, self.y)
 	end
+
+	-- Darkblue portals
+	Portals = {
+		top    = { x = TILE_SIZE * 15, y = TILE_SIZE * 2,  w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
+		bottom = { x = TILE_SIZE * 44, y = TILE_SIZE * 74, w = TILE_SIZE * 5, h = TILE_SIZE * 6 },
+	}
 end
 
 -- Screen dispatch tables
@@ -282,6 +288,16 @@ function love.update(dt)
 			if physics.CheckCollosion(p, obj) then
 				physics.HandleCollision(p, obj)
 			end
+		end
+	end
+
+	-- Darkblue portal (one-way: top -> bottom)
+	if UnlockedColor.values.darkblue then
+		local top = Portals.top
+		local bot = Portals.bottom
+		if physics.CheckCollosionWall(p, { x = top.x, y = top.y, width = top.w, height = top.h }) then
+			p.body.x = bot.x + bot.w / 2 - TILE_SIZE / 2
+			p.body.y = bot.y + bot.h / 2 - TILE_SIZE / 2
 		end
 	end
 
