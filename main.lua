@@ -160,8 +160,7 @@ function love.load()
 	}
 	--- @type Entity[]
 	Game.objects = {
-		{ col = "brown",  x = TILE_SIZE * 42, y = TILE_SIZE * 42, sprite = Game.assets.images.tree },
-		{ col = "yellow", x = TILE_SIZE * 3,  y = TILE_SIZE * 3,  sprite = Game.assets.images.tree }
+		--stuff
 	}
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
@@ -245,7 +244,7 @@ function love.update(dt)
 	-- tree collision
 	for _, tree in pairs(walls.layers[3].objects) do
 		if physics.CheckCollosionWall(p, tree) then
-			physics.HandleCollisionWall(p, tree)
+			physics.HandleCollision(p, tree)
 		end
 	end
 
