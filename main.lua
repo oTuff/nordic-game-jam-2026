@@ -316,8 +316,8 @@ function love.load()
 	local va = { x = 2, y = 55 }
 	VineGarden = {
 		zones = {
-			{ x = T * va.x,   y = T * va.y,   width = T * 4, height = T * 6, active = true, id = 1 },
-			{ x = T * (va.x + 4), y = T * va.y, width = T * 4, height = T * 6, active = true, id = 2 },
+			{ x = T * va.x,       y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 1 },
+			{ x = T * (va.x + 4), y = T * va.y,       width = T * 4, height = T * 6, active = true, id = 2 },
 			{ x = T * (va.x + 2), y = T * (va.y + 6), width = T * 4, height = T * 4, active = true, id = 3 },
 		},
 		faucets = {
