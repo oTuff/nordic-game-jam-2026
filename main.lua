@@ -148,6 +148,17 @@ function love.load()
 	settings_menu.init()
 
 	Game.camera = { x = 0, y = 0 }
+
+	-- White ending transition state
+	WhiteTransition = {
+		active = false,
+		timer = 0,
+		zoomDuration = 6, -- seconds to zoom out
+		fadeDuration = 8, -- seconds total before fully white
+		fadeDelay = 4, -- seconds before fade starts
+		startCamX = 0,
+		startCamY = 0,
+	}
 	Game.player = player.new(100, 100)
 	--- @type Unlocks[]
 	Game.unlocks = {
@@ -410,21 +421,34 @@ function love.update(dt)
 			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, type)
 			table.remove(Game.unlocks, index)
 			UnlockedColor.values[obj.col] = true
+			if obj.col == "white" and not WhiteTransition.active then
+				WhiteTransition.active = true
+				WhiteTransition.timer = 0
+				WhiteTransition.startCamX = Game.camera.x
+				WhiteTransition.startCamY = Game.camera.y
+			end
 			--print("col " .. p.body.x .. " " .. p.body.y)
 		end
 	end
 
 	particles:update(dt)
 
+	-- White transition update
+	if WhiteTransition.active then
+		WhiteTransition.timer = WhiteTransition.timer + dt
+	end
+
 	-- Camera
 	local cam = Game.camera
-	local targetX = p.body.x - GAME_WIDTH / 2
-	local targetY = p.body.y - GAME_HEIGHT / 2
-	local smoothing = 1 - math.exp(-5 * dt)
-	cam.x = cam.x + (targetX - cam.x) * smoothing
-	cam.y = cam.y + (targetY - cam.y) * smoothing
-	cam.x = math.max(0, math.min(WORLD_WIDTH - GAME_WIDTH, cam.x))
-	cam.y = math.max(0, math.min(WORLD_HEIGHT - GAME_HEIGHT, cam.y))
+	if not WhiteTransition.active then
+		local targetX = p.body.x - GAME_WIDTH / 2
+		local targetY = p.body.y - GAME_HEIGHT / 2
+		local smoothing = 1 - math.exp(-5 * dt)
+		cam.x = cam.x + (targetX - cam.x) * smoothing
+		cam.y = cam.y + (targetY - cam.y) * smoothing
+		cam.x = math.max(0, math.min(WORLD_WIDTH - GAME_WIDTH, cam.x))
+		cam.y = math.max(0, math.min(WORLD_HEIGHT - GAME_HEIGHT, cam.y))
+	end
 end
 
 function love.draw()
@@ -447,7 +471,29 @@ function love.draw()
 		local cy = -math.floor(Game.camera.y)
 
 		love.graphics.push()
-		love.graphics.translate(cx, cy)
+
+		if WhiteTransition.active then
+			local t = math.min(WhiteTransition.timer / WhiteTransition.zoomDuration, 1)
+			t = 1 - (1 - t) * (1 - t) -- ease out
+
+			local targetScale = math.min(GAME_WIDTH / WORLD_WIDTH, GAME_HEIGHT / WORLD_HEIGHT)
+			local scale = 1 + (targetScale - 1) * t
+
+			-- Start: player-centered camera offset
+			local startTX = -WhiteTransition.startCamX
+			local startTY = -WhiteTransition.startCamY
+			-- End: map centered on screen (translate then scale)
+			local endTX = (GAME_WIDTH / targetScale - WORLD_WIDTH) / 2
+			local endTY = (GAME_HEIGHT / targetScale - WORLD_HEIGHT) / 2
+			-- Lerp the pre-scale translation
+			local tx = startTX + (endTX - startTX) * t
+			local ty = startTY + (endTY - startTY) * t
+
+			love.graphics.scale(scale, scale)
+			love.graphics.translate(tx, ty)
+		else
+			love.graphics.translate(cx, cy)
+		end
 
 		love.graphics.setColor(1, 1, 1, 1)
 
@@ -505,9 +551,14 @@ function love.draw()
 		end
 	end
 
-	if UnlockedColor.values["white"] then
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.rectangle("fill", 0, 0, GAME_WIDTH, GAME_HEIGHT)
+	if WhiteTransition.active then
+		local fadeT = (WhiteTransition.timer - WhiteTransition.fadeDelay) /
+		    (WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
+		fadeT = math.max(0, math.min(fadeT, 1))
+		if fadeT > 0 then
+			love.graphics.setColor(1, 1, 1, fadeT)
+			love.graphics.rectangle("fill", 0, 0, GAME_WIDTH, GAME_HEIGHT)
+		end
 	end
 
 	push.finish()
