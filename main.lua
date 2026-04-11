@@ -160,8 +160,17 @@ function love.load()
 	}
 	--- @type Entity[]
 	Game.objects = {
-		{ col = "red", x = 300, y = 300, sprite = Game.assets.images.test }
+		{ col = "brown",  x = TILE_SIZE * 42, y = TILE_SIZE * 42, sprite = Game.assets.images.tree },
+		{ col = "yellow", x = TILE_SIZE * 3,  y = TILE_SIZE * 3,  sprite = Game.assets.images.tree }
 	}
+	for _, value in pairs(walls.layers[3].objects) do
+		table.insert(Game.objects, {
+			col = "yellow",
+			x = value.x,
+			y = value.y - TILE_SIZE,
+			sprite = Game.assets.images.tree
+		})
+	end
 
 	YellowPuzzle = {
 		-- yellow puzzle
@@ -230,6 +239,13 @@ function love.update(dt)
 	for _, obj in ipairs(Game.objects) do
 		if obj.update then
 			obj:update(p) -- only for objects to update
+		end
+	end
+
+	-- tree collision
+	for _, tree in pairs(walls.layers[3].objects) do
+		if physics.CheckCollosionWall(p, tree) then
+			physics.HandleCollisionWall(p, tree)
 		end
 	end
 
@@ -325,7 +341,7 @@ function love.draw()
 		end
 
 		for _, obj in ipairs(Game.objects) do
-			if (UnlockedColor[obj.col]) then
+			if (UnlockedColor.values[obj.col]) then
 				love.graphics.setColor(1, 1, 1, 1)
 				love.graphics.draw(obj.sprite, obj.x, obj.y)
 			end
