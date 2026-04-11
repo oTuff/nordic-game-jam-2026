@@ -42,6 +42,14 @@ function main_menu.gamepadpressed(button)
 	menu.gamepadpressed(main_menu.menu, button)
 end
 
+function main_menu.mousepressed(x, y, btn)
+	menu.mousepressed(main_menu.menu, x, y, btn)
+end
+
+function main_menu.mousemoved(x, y)
+	menu.mousemoved(main_menu.menu, x, y)
+end
+
 function main_menu.draw()
 	menu.draw(main_menu.menu, "TBD Game")
 end

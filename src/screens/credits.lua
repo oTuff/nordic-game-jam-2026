@@ -12,6 +12,12 @@ function credits.gamepadpressed(button)
 	end
 end
 
+function credits.mousepressed(x, y, btn)
+	if btn == 1 then
+		Game.currentState = GameState.menu
+	end
+end
+
 function credits.draw()
 	local w, h = GAME_WIDTH, GAME_HEIGHT
 	love.graphics.setColor(0, 0, 0, 0.7)

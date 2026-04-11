@@ -1,4 +1,5 @@
 local lip = require("vendor.lip")
+local push = require("vendor.push")
 local sound = require("src.sound")
 
 local sound_menu = {
@@ -71,6 +72,55 @@ function sound_menu.gamepadpressed(button)
 	return false
 end
 
+function sound_menu.mousepressed(x, y, btn)
+	if not sound_menu.open or btn ~= 1 then return false end
+
+	local w = GAME_WIDTH
+	local startY = 200
+	local rowH = 55
+	local labelX = w / 2 - 250
+	local valX = w / 2 + 20
+	local valW = 350
+	local rowW = valX + valW - labelX + 10
+
+	for i, _ in ipairs(items) do
+		local iy = startY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and x >= labelX - 10 and x < labelX - 10 + rowW then
+			sound_menu.selected = i
+			local midX = valX + valW / 2
+			if x >= valX then
+				if x < midX then
+					sound_menu.keypressed("left")
+				else
+					sound_menu.keypressed("right")
+				end
+			end
+			return true
+		end
+	end
+	return false
+end
+
+function sound_menu.mousemoved(x, y)
+	if not sound_menu.open then return end
+
+	local w = GAME_WIDTH
+	local startY = 200
+	local rowH = 55
+	local labelX = w / 2 - 250
+	local valX = w / 2 + 20
+	local valW = 350
+	local rowW = valX + valW - labelX + 10
+
+	for i, _ in ipairs(items) do
+		local iy = startY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and x >= labelX - 10 and x < labelX - 10 + rowW then
+			sound_menu.selected = i
+			return
+		end
+	end
+end
+
 function sound_menu.draw()
 	if not sound_menu.open then return end
 
@@ -125,9 +175,33 @@ function sound_menu.draw()
 		love.graphics.rectangle("fill", barX, barY, barW * val / 100, barH)
 	end
 
+	-- Back button
+	local backX, backY, backW, backH = 40, h - 90, 120, 40
+	local mx, my = 0, 0
+	if love.mouse.getPosition then
+		local rx, ry = love.mouse.getPosition()
+		mx, my = push.toGame(rx, ry)
+		mx = mx or 0
+		my = my or 0
+	end
+	local backHover = mx >= backX and mx < backX + backW and my >= backY and my < backY + backH
+	if backHover then
+		love.graphics.setColor(0.3, 0.3, 0.5, 0.8)
+		love.graphics.rectangle("fill", backX, backY, backW, backH)
+		love.graphics.setColor(1, 1, 0.5)
+	else
+		love.graphics.setColor(0.8, 0.8, 0.8)
+	end
+	love.graphics.printf("< Back", backX, backY + 4, backW, "center")
+
 	-- Help text
 	love.graphics.setColor(1, 1, 1)
-	love.graphics.printf("Left/Right to change, Escape to go back", 0, h - 80, w, "center")
+	love.graphics.printf("Left/Right to change, Escape to go back", 0, h - 40, w, "center")
+end
+
+function sound_menu.backHitTest(x, y)
+	local h = GAME_HEIGHT
+	return x >= 40 and x < 160 and y >= h - 90 and y < h - 50
 end
 
 return sound_menu

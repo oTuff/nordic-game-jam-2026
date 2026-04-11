@@ -84,9 +84,9 @@ function love.load()
 			msaa = 0,
 		},
 		sound = {
-			master = 100,
-			sfx = 100,
-			ambient = 100,
+			master = 50,
+			sfx = 70,
+			ambient = 50,
 		},
 	}
 
@@ -606,6 +606,39 @@ end
 function love.gamepadpressed(joystick, button)
 	local handler = screen_gamepadpressed[Game.currentState]
 	if handler then handler(button) end
+end
+
+local screen_mousepressed = {
+	menu = function(x, y, btn) main_menu.mousepressed(x, y, btn) end,
+	settings = function(x, y, btn) settings_menu.mousepressed(x, y, btn) end,
+	settings_keybinds = function(x, y, btn) settings_menu.keybinds.mousepressed(x, y, btn) end,
+	settings_video = function(x, y, btn) settings_menu.video.mousepressed(x, y, btn) end,
+	settings_sound = function(x, y, btn) settings_menu.sound.mousepressed(x, y, btn) end,
+	paused = function(x, y, btn) pause_menu.mousepressed(x, y, btn) end,
+	credits = function(x, y, btn) credits.mousepressed(x, y, btn) end,
+}
+
+local screen_mousemoved = {
+	menu = function(x, y) main_menu.mousemoved(x, y) end,
+	settings = function(x, y) settings_menu.mousemoved(x, y) end,
+	settings_keybinds = function(x, y) settings_menu.keybinds.mousemoved(x, y) end,
+	settings_video = function(x, y) settings_menu.video.mousemoved(x, y) end,
+	settings_sound = function(x, y) settings_menu.sound.mousemoved(x, y) end,
+	paused = function(x, y) pause_menu.mousemoved(x, y) end,
+}
+
+function love.mousepressed(x, y, btn)
+	local gx, gy = push.toGame(x, y)
+	if not gx then return end
+	local handler = screen_mousepressed[Game.currentState]
+	if handler then handler(gx, gy, btn) end
+end
+
+function love.mousemoved(x, y)
+	local gx, gy = push.toGame(x, y)
+	if not gx then return end
+	local handler = screen_mousemoved[Game.currentState]
+	if handler then handler(gx, gy) end
 end
 
 function love.resize()

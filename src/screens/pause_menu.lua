@@ -50,6 +50,14 @@ function pause_menu.gamepadpressed(button)
 	end
 end
 
+function pause_menu.mousepressed(x, y, btn)
+	menu.mousepressed(pause_menu.menu, x, y, btn)
+end
+
+function pause_menu.mousemoved(x, y)
+	menu.mousemoved(pause_menu.menu, x, y)
+end
+
 function pause_menu.draw()
 	menu.draw(pause_menu.menu, "Paused")
 end

@@ -56,6 +56,50 @@ function menu.gamepadpressed(m, button)
 	return false
 end
 
+function menu.mousepressed(m, x, y, btn, y_offset)
+	if btn ~= 1 then return false end
+	local w = GAME_WIDTH
+	y_offset = y_offset or 0
+	local startY = 250 + y_offset
+	local rowH = 55
+	local itemX = w / 2 - 150
+	local itemW = 300
+
+	if x < itemX or x > itemX + itemW then return false end
+
+	for i, item in ipairs(m.items) do
+		local iy = startY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and item.enabled ~= false then
+			m.selected = i
+			if item.action then
+				sound.play("menuSelect")
+				item.action()
+			end
+			return true
+		end
+	end
+	return false
+end
+
+function menu.mousemoved(m, x, y, y_offset)
+	local w = GAME_WIDTH
+	y_offset = y_offset or 0
+	local startY = 250 + y_offset
+	local rowH = 55
+	local itemX = w / 2 - 150
+	local itemW = 300
+
+	if x < itemX or x > itemX + itemW then return end
+
+	for i, item in ipairs(m.items) do
+		local iy = startY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and item.enabled ~= false then
+			m.selected = i
+			return
+		end
+	end
+end
+
 function menu.draw(m, title, y_offset)
 	local w, h = GAME_WIDTH, GAME_HEIGHT
 	y_offset = y_offset or 0

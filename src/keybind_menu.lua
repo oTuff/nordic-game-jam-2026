@@ -1,3 +1,5 @@
+local push = require("vendor.push")
+
 local COLUMN_KEYBOARD = 1
 local COLUMN_GAMEPAD = 2
 local column_labels = { "Keyboard", "Gamepad" }
@@ -163,6 +165,53 @@ function keybind_menu.gamepadpressed(button)
 	return false
 end
 
+function keybind_menu.mousepressed(x, y, btn)
+	if not keybind_menu.open or btn ~= 1 then return false end
+	if keybind_menu.conflict or keybind_menu.listening then return false end
+
+	local w = GAME_WIDTH
+	local labelX = w / 2 - 300
+	local kbX = w / 2 - 70
+	local gpX = w / 2 + 150
+	local colW = 200
+	local rowStartY = 190
+	local rowH = 50
+
+	for i, _ in ipairs(actions) do
+		local iy = rowStartY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and x >= labelX - 10 and x < gpX + colW + 10 then
+			keybind_menu.selected = i
+			if x >= gpX and x < gpX + colW then
+				keybind_menu.column = COLUMN_GAMEPAD
+			elseif x >= kbX and x < kbX + colW then
+				keybind_menu.column = COLUMN_KEYBOARD
+			end
+			keybind_menu.listening = i
+			return true
+		end
+	end
+	return false
+end
+
+function keybind_menu.mousemoved(x, y)
+	if not keybind_menu.open or keybind_menu.conflict or keybind_menu.listening then return end
+
+	local w = GAME_WIDTH
+	local labelX = w / 2 - 300
+	local gpX = w / 2 + 150
+	local colW = 200
+	local rowStartY = 190
+	local rowH = 50
+
+	for i, _ in ipairs(actions) do
+		local iy = rowStartY + (i - 1) * rowH
+		if y >= iy - 5 and y < iy + rowH - 5 and x >= labelX - 10 and x < gpX + colW + 10 then
+			keybind_menu.selected = i
+			return
+		end
+	end
+end
+
 function keybind_menu.draw()
 	if not keybind_menu.open then return end
 
@@ -258,13 +307,42 @@ function keybind_menu.draw()
 		love.graphics.printf(msg, 0, h - 160, w, "center")
 	end
 
+	-- Back button (only when not listening/conflicting and no unbound actions)
+	if not keybind_menu.listening and not keybind_menu.conflict and not keybind_menu.has_any_unbound() then
+		local backX, backY, backW, backH = 40, h - 90, 120, 40
+		local mx, my = 0, 0
+		if love.mouse.getPosition then
+			local rx, ry = love.mouse.getPosition()
+			mx, my = push.toGame(rx, ry)
+			mx = mx or 0
+			my = my or 0
+		end
+		local backHover = mx >= backX and mx < backX + backW and my >= backY and my < backY + backH
+		if backHover then
+			love.graphics.setColor(0.3, 0.3, 0.5, 0.8)
+			love.graphics.rectangle("fill", backX, backY, backW, backH)
+			love.graphics.setColor(1, 1, 0.5)
+		else
+			love.graphics.setColor(0.8, 0.8, 0.8)
+		end
+		love.graphics.printf("< Back", backX, backY + 4, backW, "center")
+	end
+
 	-- Help text
 	love.graphics.setColor(1, 1, 1)
 	if keybind_menu.has_any_unbound() then
-		love.graphics.printf("Bind all actions before closing", 0, h - 80, w, "center")
+		love.graphics.printf("Bind all actions before closing", 0, h - 40, w, "center")
 	else
-		love.graphics.printf("Arrows to navigate, Enter to rebind, Escape to close", 0, h - 80, w, "center")
+		love.graphics.printf("Arrows to navigate, Enter to rebind, Escape to close", 0, h - 40, w, "center")
 	end
+end
+
+function keybind_menu.backHitTest(x, y)
+	if keybind_menu.listening or keybind_menu.conflict or keybind_menu.has_any_unbound() then
+		return false
+	end
+	local h = GAME_HEIGHT
+	return x >= 40 and x < 160 and y >= h - 90 and y < h - 50
 end
 
 return keybind_menu
