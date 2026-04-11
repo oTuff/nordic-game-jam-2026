@@ -6,7 +6,7 @@ local enemy = require("src.models.enemy")
 local physics = require("src.models.physics")
 local sti = require("vendor.sti")
 local particles = require("src.models.particles")
-local walls = require("assets.tield.rgb")
+local walls = require("assets.tield.map")
 
 local main_menu = require("src.screens.main_menu")
 local pause_menu = require("src.screens.pause_menu")
@@ -34,7 +34,7 @@ function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setNewFont(36)
 
-	Gamemap = sti("assets/tield/rgb.lua")
+	Gamemap = sti("assets/tield/map.lua")
 	Gamemap:resize(GAME_WIDTH, GAME_HEIGHT)
 	WORLD_WIDTH  = Gamemap.width * Gamemap.tilewidth
 	WORLD_HEIGHT = Gamemap.height * Gamemap.tileheight
@@ -195,7 +195,7 @@ function love.update(dt)
 		end
 	end
 
-	for _, wall in pairs(walls.layers[4].objects) do
+	for _, wall in pairs(walls.layers[2].objects) do
 		if physics.CheckCollosionWall(p, wall) then
 			physics.HandleCollisionWall(p, wall)
 		end
@@ -246,6 +246,9 @@ function love.draw()
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
+
+		Gamemap:drawLayer(Gamemap.layers["main"], cx, cy)
+
 		for key, value in pairs(UnlockedColor) do
 			if value then
 				Gamemap:drawLayer(Gamemap.layers[key], cx, cy)
