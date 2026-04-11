@@ -209,10 +209,12 @@ function love.update(dt)
 
 	for index, obj in ipairs(Game.unlocks) do
 		if physics.CheckCollosion(p, obj) then
-			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, particles.Effects.explosion)
+			local type = particles.Effects.explosion
+			type.color = obj.color -- TODO maybe randomize color a bit
+			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, type)
 			table.remove(Game.unlocks, index)
 			UnlockedColor[obj.col] = true
-			print("col " .. p.body.x .. " " .. p.body.y)
+			--print("col " .. p.body.x .. " " .. p.body.y)
 		end
 	end
 
