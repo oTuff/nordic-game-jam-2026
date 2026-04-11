@@ -115,7 +115,8 @@ function love.load()
 			brown = false,
 			red = false,
 			darkgreen = false,
-			darkblue = false
+			darkblue = false,
+			white = false
 		}
 	}
 
@@ -158,6 +159,7 @@ function love.load()
 		{ col = "brown",      x = TILE_SIZE * 42, y = TILE_SIZE * 42, color = { 0.60, 0.30, 0.10, 1 } },
 		{ col = "darkgreen",  x = TILE_SIZE * 8,  y = TILE_SIZE * 72, color = { 0, 0.39, 0, 1 } },
 		{ col = "darkblue",   x = TILE_SIZE * 62, y = TILE_SIZE * 63, color = { 0, 0, 0.55, 1 } },
+		{ col = "white",      x = TILE_SIZE * 35, y = TILE_SIZE * 65, color = { 1, 1, 1, 1 } },
 	}
 	--- @type Entity[]
 	Game.objects = {
@@ -502,6 +504,11 @@ function love.draw()
 		if state == GameState.paused then
 			pause_menu.draw()
 		end
+	end
+
+	if UnlockedColor.values["white"] then
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.rectangle("fill", 0, 0, GAME_WIDTH, GAME_HEIGHT)
 	end
 
 	push.finish()
