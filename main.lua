@@ -242,22 +242,22 @@ function love.draw()
 		local cx = -math.floor(Game.camera.x)
 		local cy = -math.floor(Game.camera.y)
 
+		love.graphics.push()
+		love.graphics.translate(cx, cy)
+
 		-- Fix push working with sti
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
 
-		Gamemap:drawLayer(Gamemap.layers["main"], cx, cy)
+		Gamemap:drawLayer(Gamemap.layers["main"])
 
 		for key, value in pairs(UnlockedColor) do
 			if value then
-				Gamemap:drawLayer(Gamemap.layers[key], cx, cy)
+				Gamemap:drawLayer(Gamemap.layers[key])
 			end
 		end
 		love.graphics.setScissor(sx, sy, sw, sh)
-
-		love.graphics.push()
-		love.graphics.translate(cx, cy)
 
 		local p = Game.player
 		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
