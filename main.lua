@@ -556,9 +556,7 @@ function love.draw()
 		VineGarden:draw()
 
 		local p = Game.player
-		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
-		love.graphics.setColor(0.1, 0.1, 0.1)
-		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
+		p:draw()
 
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
