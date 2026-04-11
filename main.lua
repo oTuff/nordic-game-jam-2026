@@ -105,7 +105,7 @@ function love.load()
 	end
 
 	UnlockedColor = {
-		order = { "yellow", "blue", "lightgreen", "pink", "brown", "red", "darkgreen", "darkblue" },
+		order = { "darkgreen", "yellow", "blue", "lightgreen", "pink", "brown", "red", "darkblue" },
 		values = {
 			yellow = false,
 			blue = false,
