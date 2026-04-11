@@ -31,6 +31,7 @@ function love.load()
 	SETTINGS_FILENAME = "settings.ini"
 
 	push.setupScreen(GAME_WIDTH, GAME_HEIGHT)
+	love.graphics.setBackgroundColor(0.02, 0.02, 0.02)
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setNewFont(36)
 
@@ -180,18 +181,38 @@ function love.load()
 		},
 		---@type boolean
 		solved = false,
-		---@type Entity
 		handle = {
 			x = TILE_SIZE * 42,
 			y = TILE_SIZE * 14,
 			col = "yellow",
-			sprite = Game.assets.images.handle
+			frames = Game.assets.images.handle,
+			frameIndex = 1,
+			frameTimer = 0,
+			animating = false,
 		}
 	}
 	function YellowPuzzle.handle:update(p)
-		if (p.interact and physics.CheckCollosion(p, self)) then
-			YellowPuzzle.solved = true;
+		if self.animating then
+			self.frameTimer = self.frameTimer + love.timer.getDelta()
+			if self.frameTimer >= 0.15 then
+				self.frameTimer = self.frameTimer - 0.15
+				if self.frameIndex < #self.frames then
+					self.frameIndex = self.frameIndex + 1
+				else
+					self.animating = false
+					YellowPuzzle.solved = true
+				end
+			end
+		elseif p.interact and physics.CheckCollosion(p, self) then
+			self.animating = true
+			self.frameIndex = 1
+			self.frameTimer = 0
 		end
+	end
+
+	function YellowPuzzle.handle:draw()
+		local f = self.frames[self.frameIndex]
+		love.graphics.draw(f.image, f.quad, self.x, self.y)
 	end
 end
 
@@ -318,7 +339,7 @@ function love.draw()
 		--Gamemap:drawLayer(Gamemap.layers["main"])
 
 		if UnlockedColor.values["yellow"] then
-			love.graphics.draw(YellowPuzzle.handle.sprite, YellowPuzzle.handle.x, YellowPuzzle.handle.y)
+			YellowPuzzle.handle:draw()
 		end
 
 		for _, color in pairs(UnlockedColor.order) do
