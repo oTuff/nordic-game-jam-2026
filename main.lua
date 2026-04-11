@@ -166,15 +166,9 @@ function love.load()
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
 			col = "yellow",
-			x = value.x - TILE_SIZE * 2 - 8,
-			y = value.y - TILE_SIZE * 6,
+			x = value.x,
+			y = value.y - TILE_SIZE,
 			sprite = Game.assets.images.tree
-		})
-		table.insert(Game.objects, {
-			col = "lightgreen",
-			x = value.x - TILE_SIZE * 2 - 8,
-			y = value.y - TILE_SIZE * 6,
-			sprite = Game.assets.images.leaves1
 		})
 	end
 
@@ -562,8 +556,9 @@ function love.draw()
 		VineGarden:draw()
 
 		local p = Game.player
-		love.graphics.setColor(1, 1, 1, 1)
-		p:draw()
+		--love.graphics.draw(p.sprite, p.body.x, p.body.y)
+		love.graphics.setColor(0.1, 0.1, 0.1)
+		love.graphics.rectangle("fill", p.body.x, p.body.y, TILE_SIZE, TILE_SIZE)
 
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
