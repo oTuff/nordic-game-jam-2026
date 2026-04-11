@@ -184,7 +184,7 @@ function love.load()
 	}
 	--- @type Entity[]
 	Game.objects = {
-		--stuff
+		{ col = "red", x = TILE_SIZE * 10, y = TILE_SIZE * 44, sprite = Game.assets.images.mushroom },
 	}
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {

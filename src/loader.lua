@@ -31,6 +31,7 @@ return {
 				faucet = love.graphics.newImage("assets/images/faucet.png"),
 				vines = love.graphics.newImage("assets/images/vines.png"),
 				water = love.graphics.newImage("assets/images/water.png"),
+				mushroom = love.graphics.newImage("assets/images/mushroom.png"),
 			},
 			fonts = {
 			},
