@@ -2,12 +2,14 @@ local lip = require("vendor.lip")
 local menu = require("src.menu")
 local keybind_menu = require("src.keybind_menu")
 local video_menu = require("src.video_menu")
+local sound_menu = require("src.sound_menu")
 
 local settings_menu = {}
 
 function settings_menu.init()
 	Game.keybind_menu = keybind_menu
 	Game.video_menu = video_menu
+	Game.sound_menu = sound_menu
 
 	settings_menu.menu = menu.new({
 		{
@@ -22,6 +24,13 @@ function settings_menu.init()
 			action = function()
 				Game.currentState = GameState.settings_video
 				Game.video_menu.open = true
+			end,
+		},
+		{
+			label = "Sound",
+			action = function()
+				Game.currentState = GameState.settings_sound
+				Game.sound_menu.open = true
 			end,
 		},
 	})
@@ -101,6 +110,31 @@ end
 
 function settings_menu.video.draw()
 	video_menu.draw()
+end
+
+-- Sound sub-screen
+settings_menu.sound = {}
+
+function settings_menu.sound.keypressed(key)
+	if key == "escape" then
+		sound_menu.open = false
+		Game.currentState = GameState.settings
+		return
+	end
+	sound_menu.keypressed(key)
+end
+
+function settings_menu.sound.gamepadpressed(button)
+	if button == "b" then
+		sound_menu.open = false
+		Game.currentState = GameState.settings
+		return
+	end
+	sound_menu.gamepadpressed(button)
+end
+
+function settings_menu.sound.draw()
+	sound_menu.draw()
 end
 
 return settings_menu

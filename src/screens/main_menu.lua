@@ -43,7 +43,7 @@ function main_menu.gamepadpressed(button)
 end
 
 function main_menu.draw()
-	menu.draw(main_menu.menu, "My Game")
+	menu.draw(main_menu.menu, "TBD Game")
 end
 
 return main_menu

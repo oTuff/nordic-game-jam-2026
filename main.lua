@@ -55,6 +55,7 @@ function love.load()
 		settings = "settings",
 		settings_keybinds = "settings_keybinds",
 		settings_video = "settings_video",
+		settings_sound = "settings_sound",
 		credits = "credits",
 		gameOver = "gameOver",
 	}
@@ -81,6 +82,11 @@ function love.load()
 			fullscreen = false,
 			vsync = true,
 			msaa = 0,
+		},
+		sound = {
+			master = 100,
+			sfx = 100,
+			ambient = 100,
 		},
 	}
 
@@ -345,6 +351,7 @@ local screen_draw = {
 	settings = function() settings_menu.draw() end,
 	settings_keybinds = function() settings_menu.keybinds.draw() end,
 	settings_video = function() settings_menu.video.draw() end,
+	settings_sound = function() settings_menu.sound.draw() end,
 }
 
 local screen_keypressed = {
@@ -353,6 +360,7 @@ local screen_keypressed = {
 	settings = function(key) settings_menu.keypressed(key) end,
 	settings_keybinds = function(key, scancode) settings_menu.keybinds.keypressed(key, scancode) end,
 	settings_video = function(key) settings_menu.video.keypressed(key) end,
+	settings_sound = function(key) settings_menu.sound.keypressed(key) end,
 	playing = function(key)
 		if key == "escape" then Game.currentState = GameState.paused end
 	end,
@@ -365,6 +373,7 @@ local screen_gamepadpressed = {
 	settings = function(button) settings_menu.gamepadpressed(button) end,
 	settings_keybinds = function(button) settings_menu.keybinds.gamepadpressed(button) end,
 	settings_video = function(button) settings_menu.video.gamepadpressed(button) end,
+	settings_sound = function(button) settings_menu.sound.gamepadpressed(button) end,
 	playing = function(button)
 		if button == "start" then Game.currentState = GameState.paused end
 	end,
