@@ -151,10 +151,10 @@ function love.load()
 		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 } }, -- blue
 		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 } }, -- green
 		{ col = "yellow",     x = TILE_SIZE * 11, y = TILE_SIZE * 20, color = { 1, 1, 0, 1 } },
-		{ col = "pink",       x = TILE_SIZE * 67, y = TILE_SIZE * 32, color = { 1, 1, 0, 1 } },
-		{ col = "brown",      x = TILE_SIZE * 42, y = TILE_SIZE * 42, color = { 1, 1, 0, 1 } },
-		{ col = "darkgreen",  x = TILE_SIZE * 8,  y = TILE_SIZE * 72, color = { 1, 1, 0, 1 } },
-		{ col = "darkblue",   x = TILE_SIZE * 62, y = TILE_SIZE * 63, color = { 1, 1, 0, 1 } }
+		{ col = "pink",       x = TILE_SIZE * 67, y = TILE_SIZE * 32, color = { 1, 0.75, 0.80, 1 } },
+		{ col = "brown",      x = TILE_SIZE * 42, y = TILE_SIZE * 42, color = { 0.60, 0.30, 0.10, 1 } },
+		{ col = "darkgreen",  x = TILE_SIZE * 8,  y = TILE_SIZE * 72, color = { 0, 0.39, 0, 1 } },
+		{ col = "darkblue",   x = TILE_SIZE * 62, y = TILE_SIZE * 63, color = { 0, 0, 0.55, 1 } },
 	}
 	--- @type Entity[]
 	Game.objects = {
