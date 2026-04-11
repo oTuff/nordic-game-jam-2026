@@ -123,8 +123,8 @@ function love.load()
 			red = false,
 			darkgreen = false,
 			darkblue = false,
-			white = false
-		}
+			white = false,
+		},
 	}
 
 	-- Apply saved video settings
@@ -188,16 +188,16 @@ function love.load()
 	}
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
-			col = "yellow",
+			col = "brown",
 			x = value.x - TILE_SIZE * 2 - 8,
 			y = value.y - TILE_SIZE * 6,
-			sprite = Game.assets.images.tree
+			sprite = Game.assets.images.tree,
 		})
 		table.insert(Game.objects, {
-			col = "lightgreen",
+			col = "red",
 			x = value.x - TILE_SIZE * 2 - 8,
 			y = value.y - TILE_SIZE * 6,
-			sprite = Game.assets.images.leaves1
+			sprite = Game.assets.images.leaves1,
 		})
 	end
 
@@ -206,7 +206,7 @@ function love.load()
 		---@type Object[]
 		yellowBlocked = {
 			{ x = TILE_SIZE * 40, y = TILE_SIZE * 16, col = "" },
-			{ x = TILE_SIZE * 41, y = TILE_SIZE * 16, col = "" }
+			{ x = TILE_SIZE * 41, y = TILE_SIZE * 16, col = "" },
 		},
 		---@type boolean
 		solved = false,
@@ -217,7 +217,7 @@ function love.load()
 			frames = Game.assets.images.lever,
 			frameIndex = 1,
 			pulled = false,
-		}
+		},
 	}
 	function YellowPuzzle.lever:update(p)
 		if self.pulled then return end
@@ -566,7 +566,11 @@ function love.draw()
 
 		for _, obj in ipairs(Game.objects) do
 			if (UnlockedColor.values[obj.col]) then
-				love.graphics.setColor(1, 1, 1, 1)
+				if obj.sprite == Game.assets.images.leaves1 then
+					love.graphics.setColor(1, 1, 1, 1)
+				else
+					love.graphics.setColor(1, 1, 1, 1)
+				end
 				love.graphics.draw(obj.sprite, obj.x, obj.y)
 			end
 		end

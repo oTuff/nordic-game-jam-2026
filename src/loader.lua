@@ -24,7 +24,7 @@ return {
 				playerImg = love.graphics.newImage("assets/images/frogo.png"),
 				handle = loadSheet("assets/images/handle-Sheet.png", 32, 32),
 				tree = love.graphics.newImage("assets/images/tree2.png"),
-				leaves1 = love.graphics.newImage("assets/images/leaves.png"),
+				leaves1 = love.graphics.newImage("assets/images/leavesred.png"),
 				blackcat_idle = loadVariants("blackcat_idle_", 32, 32),
 				blackcat_walk = loadVariants("blackcat_walk_", 32, 32),
 				lever = loadSheet("assets/images/lever.png", 32, 32),
