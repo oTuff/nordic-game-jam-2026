@@ -77,16 +77,13 @@ function settings_menu.draw()
 	menu.draw(settings_menu.menu, "Settings")
 
 	-- Back button
-	local w, h = GAME_WIDTH, GAME_HEIGHT
-	local backX, backY, backW, backH = 40, h - 90, 120, 40
-	local mx, my = 0, 0
+	local backX, backY, backW, backH = 40, GAME_HEIGHT - 90, 120, 40
+	local mx, my
 	if love.mouse.getPosition then
 		local rx, ry = love.mouse.getPosition()
 		mx, my = push.toGame(rx, ry)
-		mx = mx or 0
-		my = my or 0
 	end
-	local backHover = mx >= backX and mx < backX + backW and my >= backY and my < backY + backH
+	local backHover = mx and my and mx >= backX and mx < backX + backW and my >= backY and my < backY + backH
 	if backHover then
 		love.graphics.setColor(0.3, 0.3, 0.5, 0.8)
 		love.graphics.rectangle("fill", backX, backY, backW, backH)
