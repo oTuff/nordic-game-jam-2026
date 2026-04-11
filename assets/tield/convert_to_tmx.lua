@@ -2,10 +2,11 @@
 local map = dofile("map.lua")
 
 local out = {}
-local function w(s) out[#out+1] = s end
+local function w(s) out[#out + 1] = s end
 
 w('<?xml version="1.0" encoding="UTF-8"?>')
-w(string.format('<map version="%s" tiledversion="%s" orientation="%s" renderorder="%s" width="%d" height="%d" tilewidth="%d" tileheight="%d" infinite="0" nextlayerid="%d" nextobjectid="%d">',
+w(string.format(
+    '<map version="%s" tiledversion="%s" orientation="%s" renderorder="%s" width="%d" height="%d" tilewidth="%d" tileheight="%d" infinite="0" nextlayerid="%d" nextobjectid="%d">',
     map.version, map.tiledversion, map.orientation, map.renderorder,
     map.width, map.height, map.tilewidth, map.tileheight,
     map.nextlayerid, map.nextobjectid))
@@ -35,7 +36,7 @@ for _, layer in ipairs(map.layers) do
             for col = 1, layer.width do
                 cols[col] = tostring(data[row * layer.width + col])
             end
-            rows[#rows+1] = table.concat(cols, ",")
+            rows[#rows + 1] = table.concat(cols, ",")
         end
         w(table.concat(rows, ",\n"))
         w('  </data>')
@@ -59,6 +60,8 @@ end
 w('</map>')
 
 local file = io.open("map.tmx", "w")
-file:write(table.concat(out, "\n"))
-file:close()
-print("Wrote map.tmx")
+if file then
+    file:write(table.concat(out, "\n"))
+    file:close()
+    print("Wrote map.tmx")
+end

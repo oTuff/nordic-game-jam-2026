@@ -52,8 +52,9 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
         local phi = math.sin(math.rad(love.math.random(-type.spread, type.spread)))
         local xv = _xv + (love.math.random() * (type.speed[2] - type.speed[1]) + type.speed[1]) * theta
         local yv = _yv + (love.math.random() * (type.speed[2] - type.speed[1]) + type.speed[1]) * phi
-        local offsetx = _x + (love.math.random() * (TILE_SIZE - (-TILE_SIZE)) + (-TILE_SIZE))
-        local offsety = _y + (love.math.random() * (TILE_SIZE - (-TILE_SIZE)) + (-TILE_SIZE))
+        local size = TILE_SIZE / 2
+        local offsetx = _x + (love.math.random() * (size - (-size)) + (-size))
+        local offsety = _y + (love.math.random() * (size - (-size)) + (-size))
         self:spawnParticle(offsetx, offsety, xv, yv, type)
     end
 end
