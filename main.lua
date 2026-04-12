@@ -119,7 +119,7 @@ function love.load()
 			blue = false,
 			lightgreen = false,
 			pink = false,
-			brown = false,
+			brown = true,
 			red = false,
 			darkgreen = false,
 			darkblue = false,
@@ -344,6 +344,27 @@ function love.load()
 		end
 		love.graphics.setColor(1, 1, 1, 1)
 	end
+
+	Campfirepuzzle = {
+		cornerx = TILE_SIZE * 43, -- 1376
+		cornery = TILE_SIZE * 47, -- 1504
+		widtch = 7,
+		--- 43,47 (* 7)
+		solved = false,
+		---@type Entity[]
+		shrooms = {
+			{ x = 1376, y = 1504, col = "yellow", sprite = Game.assets.images.mushroom },
+			{ x = 1376, y = 1632, col = "yellow", sprite = Game.assets.images.mushroom },
+			{ x = 1472, y = 1632, col = "yellow", sprite = Game.assets.images.mushroom },
+		},
+		shroomBlocked = {
+			{ x = TILE_SIZE * 51, y = TILE_SIZE * 56, col = "red" },
+			{ x = TILE_SIZE * 52, y = TILE_SIZE * 56, col = "red" },
+			{ x = TILE_SIZE * 53, y = TILE_SIZE * 56, col = "red" },
+		},
+		---@type number[]
+		solvePos = {},
+	}
 end
 
 -- Screen dispatch tables
@@ -393,6 +414,20 @@ function love.update(dt)
 	local p = Game.player
 	p:update(dt)
 
+	-- campfirepuzzle
+	if not Campfirepuzzle.solved then
+		for _, shroom in pairs(Campfirepuzzle.shrooms) do
+			if physics.CheckCollosion(p, shroom) then
+				physics.HandleCollisionMovable(p, shroom)
+			end
+		end
+		for _, obj in pairs(Campfirepuzzle.shroomBlocked) do
+			if physics.CheckCollosion(p, obj) then
+				physics.HandleCollision(p, obj)
+			end
+		end
+	end
+
 	for _, obj in ipairs(Game.objects) do
 		if obj.update then
 			obj:update(p) -- only for objects to update
@@ -410,7 +445,7 @@ function love.update(dt)
 	-- tree collision
 	for _, tree in pairs(walls.layers[3].objects) do
 		if physics.CheckCollosionWall(p, tree) then
-			physics.HandleCollision(p, tree)
+			physics.HandleCollisionWall(p, tree)
 		end
 	end
 
@@ -583,6 +618,12 @@ function love.draw()
 					love.graphics.setColor(1, 1, 1, 1)
 				end
 				love.graphics.draw(obj.sprite, obj.x, obj.y)
+			end
+		end
+
+		if UnlockedColor.values["yellow"] then
+			for _, shroom in pairs(Campfirepuzzle.shrooms) do
+				love.graphics.draw(shroom.sprite, shroom.x, shroom.y)
 			end
 		end
 

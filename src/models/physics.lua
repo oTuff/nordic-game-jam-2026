@@ -21,6 +21,8 @@ function Body.new(x, y)
 	return self
 end
 
+---@param dirx number
+---@param diry number
 function Body:addForce(dirx, diry)
 	self.ax = self.ax + dirx
 	self.ay = self.ay + diry
@@ -116,6 +118,34 @@ physics.CheckCollosion = function(a, b)
 	local bx2 = b.x + TILE_SIZE
 	local by2 = b.y + TILE_SIZE
 	return not (ax2 <= bx or ax >= bx2 or ay2 <= by or ay >= by2)
+end
+
+--- same as HandleCollision but both bodies get moved
+---@param a Player
+---@param b table
+physics.HandleCollisionMovable = function(a, b)
+	local overlapX = math.min(a.body.x + TILE_SIZE - b.x, b.x + TILE_SIZE - a.body.x)
+	local overlapY = math.min(a.body.y + TILE_SIZE - b.y, b.y + TILE_SIZE - a.body.y)
+
+	if overlapX < overlapY then
+		if a.body.x < b.x then
+			a.body.x = a.body.x - overlapX
+			b.x = b.x + overlapX
+		else
+			a.body.x = a.body.x + overlapX
+			b.x = b.x - overlapX
+		end
+		--a.body.velx = 0
+	else
+		if a.body.y < b.y then
+			a.body.y = a.body.y - overlapY
+			b.y = b.y + overlapY
+		else
+			a.body.y = a.body.y + overlapY
+			b.y = b.y - overlapY
+		end
+		--a.body.vely = 0
+	end
 end
 
 --- stops player movemennt on object (as if objects are solid)
