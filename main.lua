@@ -22,6 +22,7 @@ local credits = require("src.screens.credits")
 ---@class Entity:Object
 ---@field sprite love.Image
 ---@field update function?
+---@field flipped boolean?
 
 ---@class Unlocks:Object
 ---@field color number[]
@@ -192,12 +193,14 @@ function love.load()
 			x = value.x - TILE_SIZE * 2 - 8,
 			y = value.y - TILE_SIZE * 6,
 			sprite = Game.assets.images.tree,
+			flipped = math.random(2) - 1,
 		})
 		table.insert(Game.objects, {
 			col = "red",
 			x = value.x - TILE_SIZE * 2 - 8,
 			y = value.y - TILE_SIZE * 6,
 			sprite = Game.assets.images.leaves1,
+			flipped = math.random(2) - 1,
 		})
 	end
 
@@ -735,12 +738,12 @@ function love.draw()
 
 		for _, obj in ipairs(Game.objects) do
 			if (UnlockedColor.values[obj.col]) then
-				if obj.sprite == Game.assets.images.leaves1 then
-					love.graphics.setColor(1, 1, 1, 1)
+				love.graphics.setColor(1, 1, 1, 1)
+				if obj.flipped == 1 then
+					love.graphics.draw(obj.sprite, obj.x, obj.y, 0, -1, 1, obj.sprite:getWidth(), 0)
 				else
-					love.graphics.setColor(1, 1, 1, 1)
+					love.graphics.draw(obj.sprite, obj.x, obj.y)
 				end
-				love.graphics.draw(obj.sprite, obj.x, obj.y)
 			end
 		end
 
@@ -781,7 +784,7 @@ function love.draw()
 
 	if WhiteTransition.active then
 		local fadeT = (WhiteTransition.timer - WhiteTransition.fadeDelay) /
-		    (WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
+			(WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
 		fadeT = math.max(0, math.min(fadeT, 1))
 		if fadeT > 0 then
 			love.graphics.setColor(1, 1, 1, fadeT)
