@@ -119,7 +119,7 @@ function love.load()
 			blue = false,
 			lightgreen = false,
 			pink = false,
-			brown = true,
+			brown = false,
 			red = false,
 			darkgreen = false,
 			darkblue = false,
@@ -346,24 +346,32 @@ function love.load()
 	end
 
 	Campfirepuzzle = {
-		cornerx = TILE_SIZE * 43, -- 1376
-		cornery = TILE_SIZE * 47, -- 1504
-		widtch = 7,
-		--- 43,47 (* 7)
 		solved = false,
-		---@type Entity[]
+		-- Boundary: mushrooms reset if pushed outside this area
+		boundary = { x = TILE_SIZE * 42, y = TILE_SIZE * 47, w = TILE_SIZE * 14, h = TILE_SIZE * 10 },
 		shrooms = {
-			{ x = 1376, y = 1504, col = "yellow", sprite = Game.assets.images.mushroom },
-			{ x = 1376, y = 1632, col = "yellow", sprite = Game.assets.images.mushroom },
-			{ x = 1472, y = 1632, col = "yellow", sprite = Game.assets.images.mushroom },
+			{ x = 1376, y = 1504, origX = 1376, origY = 1504, col = "red", placed = false, sprite = Game.assets.images.mushroom },
+			{ x = 1376, y = 1632, origX = 1376, origY = 1632, col = "red", placed = false, sprite = Game.assets.images.mushroom },
+			{ x = 1472, y = 1632, origX = 1472, origY = 1632, col = "red", placed = false, sprite = Game.assets.images.mushroom },
 		},
 		shroomBlocked = {
 			{ x = TILE_SIZE * 51, y = TILE_SIZE * 56, col = "red" },
 			{ x = TILE_SIZE * 52, y = TILE_SIZE * 56, col = "red" },
 			{ x = TILE_SIZE * 53, y = TILE_SIZE * 56, col = "red" },
 		},
-		---@type number[]
-		solvePos = {},
+		-- Campfire slots where mushrooms snap into
+		slots = {
+			{ x = TILE_SIZE * 51, y = TILE_SIZE * 55, filled = false },
+			{ x = TILE_SIZE * 52, y = TILE_SIZE * 55, filled = false },
+			{ x = TILE_SIZE * 53, y = TILE_SIZE * 55, filled = false },
+		},
+		-- Campfire sprite position (centered above slots)
+		campfireX = TILE_SIZE * 52,
+		campfireY = TILE_SIZE * 54,
+		animTimer = 0,
+		animFrame = 1,
+		animSpeed = 0.15,
+		snapThreshold = 16,
 	}
 end
 
@@ -416,11 +424,126 @@ function love.update(dt)
 
 	-- campfirepuzzle
 	if not Campfirepuzzle.solved then
+		-- Animate campfire
+		Campfirepuzzle.animTimer = Campfirepuzzle.animTimer + dt
+		if Campfirepuzzle.animTimer >= Campfirepuzzle.animSpeed then
+			Campfirepuzzle.animTimer = Campfirepuzzle.animTimer - Campfirepuzzle.animSpeed
+			Campfirepuzzle.animFrame = Campfirepuzzle.animFrame % #Game.assets.images.campfire + 1
+		end
+
+		-- Player-mushroom collisions (skip placed mushrooms)
 		for _, shroom in pairs(Campfirepuzzle.shrooms) do
-			if physics.CheckCollosion(p, shroom) then
+			if not shroom.placed and physics.CheckCollosion(p, shroom) then
 				physics.HandleCollisionMovable(p, shroom)
 			end
 		end
+
+		-- Mushroom-to-mushroom collisions
+		local shrooms = Campfirepuzzle.shrooms
+		for i = 1, #shrooms do
+			for j = i + 1, #shrooms do
+				if not shrooms[i].placed and not shrooms[j].placed then
+					local a, b = shrooms[i], shrooms[j]
+					local ox = math.min(a.x + TILE_SIZE - b.x, b.x + TILE_SIZE - a.x)
+					local oy = math.min(a.y + TILE_SIZE - b.y, b.y + TILE_SIZE - a.y)
+					if ox > 0 and oy > 0 then
+						if ox < oy then
+							local half = ox / 2
+							if a.x < b.x then
+								a.x = a.x - half; b.x = b.x + half
+							else
+								a.x = a.x + half; b.x = b.x - half
+							end
+						else
+							local half = oy / 2
+							if a.y < b.y then
+								a.y = a.y - half; b.y = b.y + half
+							else
+								a.y = a.y + half; b.y = b.y - half
+							end
+						end
+					end
+				end
+			end
+		end
+
+		-- Boundary check & wall collision: reset mushrooms pushed outside or into walls
+		local bounds = Campfirepuzzle.boundary
+		for _, shroom in pairs(Campfirepuzzle.shrooms) do
+			if not shroom.placed then
+				local outOfBounds = shroom.x < bounds.x or shroom.x + TILE_SIZE > bounds.x + bounds.w
+					or shroom.y < bounds.y or shroom.y + TILE_SIZE > bounds.y + bounds.h
+				local hitWall = false
+				if not outOfBounds then
+					-- Check if mushroom overlaps any map wall
+					for _, wall in pairs(walls.layers[2].objects) do
+						if shroom.x + TILE_SIZE > wall.x and shroom.x < wall.x + wall.width
+							and shroom.y + TILE_SIZE > wall.y and shroom.y < wall.y + wall.height then
+							hitWall = true; break
+						end
+					end
+					if not hitWall then
+						for _, tree in pairs(walls.layers[3].objects) do
+							if shroom.x + TILE_SIZE > tree.x and shroom.x < tree.x + tree.width
+								and shroom.y + TILE_SIZE > tree.y and shroom.y < tree.y + tree.height then
+								hitWall = true; break
+							end
+						end
+					end
+				end
+				if outOfBounds or hitWall then
+					shroom.x = shroom.origX
+					shroom.y = shroom.origY
+				end
+			end
+		end
+
+		-- Slot snapping: snap mushrooms close to unfilled slots
+		for _, shroom in pairs(Campfirepuzzle.shrooms) do
+			if not shroom.placed then
+				local shroomCX = shroom.x + TILE_SIZE / 2
+				local shroomCY = shroom.y + TILE_SIZE / 2
+				for _, slot in pairs(Campfirepuzzle.slots) do
+					if not slot.filled then
+						local slotCX = slot.x + TILE_SIZE / 2
+						local slotCY = slot.y + TILE_SIZE / 2
+						local dist = math.sqrt((shroomCX - slotCX) ^ 2 + (shroomCY - slotCY) ^ 2)
+						if dist < Campfirepuzzle.snapThreshold then
+							shroom.x = slot.x
+							shroom.y = slot.y
+							shroom.placed = true
+							slot.filled = true
+							break
+						end
+					end
+				end
+			end
+		end
+
+		-- Solve check: all slots filled
+		local allFilled = true
+		for _, slot in pairs(Campfirepuzzle.slots) do
+			if not slot.filled then
+				allFilled = false; break
+			end
+		end
+		if allFilled then
+			Campfirepuzzle.solved = true
+			sound.play("puzzleSolved")
+			local cx = Campfirepuzzle.campfireX + TILE_SIZE / 2
+			local cy = Campfirepuzzle.campfireY + TILE_SIZE / 2
+			particles:spawnParticleEffect(cx, cy, 0, 0, {
+				count = { 15, 25 },
+				lifetime = { 0.5, 1.0 },
+				speed = { 0.1, 0.4 },
+				size = { 4, 10 },
+				spread = 180,
+				color = { 1, 0.6, 0.1, 0.9 },
+				offset = 32,
+			})
+		end
+
+		-- Blocked walls (removed when solved)
 		for _, obj in pairs(Campfirepuzzle.shroomBlocked) do
 			if physics.CheckCollosion(p, obj) then
 				physics.HandleCollision(p, obj)
@@ -622,8 +745,27 @@ function love.draw()
 		end
 
 		if UnlockedColor.values["yellow"] then
-			for _, shroom in pairs(Campfirepuzzle.shrooms) do
-				love.graphics.draw(shroom.sprite, shroom.x, shroom.y)
+			-- Draw campfire (animated)
+			love.graphics.setColor(1, 1, 1, 1)
+			local cf = Game.assets.images.campfire[Campfirepuzzle.animFrame]
+			love.graphics.draw(cf.image, cf.quad, Campfirepuzzle.campfireX, Campfirepuzzle.campfireY)
+
+			-- Draw unfilled slot indicators
+			for _, slot in pairs(Campfirepuzzle.slots) do
+				if not slot.filled then
+					love.graphics.setColor(1, 0.8, 0.2, 0.3)
+					love.graphics.rectangle("fill", slot.x + 4, slot.y + 4, TILE_SIZE - 8,
+						TILE_SIZE - 8)
+				end
+			end
+			love.graphics.setColor(1, 1, 1, 1)
+
+
+			if UnlockedColor.values["red"] then
+				-- Draw mushrooms
+				for _, shroom in pairs(Campfirepuzzle.shrooms) do
+					love.graphics.draw(shroom.sprite, shroom.x, shroom.y)
+				end
 			end
 		end
 
@@ -639,7 +781,7 @@ function love.draw()
 
 	if WhiteTransition.active then
 		local fadeT = (WhiteTransition.timer - WhiteTransition.fadeDelay) /
-			(WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
+		    (WhiteTransition.fadeDuration - WhiteTransition.fadeDelay)
 		fadeT = math.max(0, math.min(fadeT, 1))
 		if fadeT > 0 then
 			love.graphics.setColor(1, 1, 1, fadeT)
