@@ -13,9 +13,13 @@ local IDLE_FPS = 1 / 0.300 -- 300ms per frame
 -- Determines which sprite variant to use based on collected colors.
 -- Matches the progression: 0=none, 1=yellow, 2=+blue, 3=+lightgreen,
 -- 4=+pink, 5=+brown, 6a/6b=red or darkgreen, 7=both, 8=+darkblue
+local eyedelay = 0
 local function getSpriteVariant()
 	local u = UnlockedColor.values
 	local count = 0
+	if eyedelay > 10 and not u.yellow then
+		count = 1
+	end
 	-- Count in progression order
 	local sequence = { "yellow", "blue", "lightgreen", "pink", "brown" }
 	for _, col in ipairs(sequence) do
@@ -57,6 +61,7 @@ function Player.new(x, y)
 end
 
 function Player:update(dt)
+	eyedelay = eyedelay + dt
 	-- input handling --
 	local kb = Game.settings.controls
 	local gp = Game.settings.gamepad
