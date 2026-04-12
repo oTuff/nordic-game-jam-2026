@@ -122,7 +122,7 @@ function love.load()
 			lightgreen = false,
 			pink = false,
 			brown = false,
-			red = false,
+			red = true,
 			darkgreen = false,
 			darkblue = false,
 			white = false,
@@ -186,7 +186,7 @@ function love.load()
 	}
 	--- @type Entity[]
 	Game.objects = {
-		{ col = "red", x = TILE_SIZE * 10, y = TILE_SIZE * 44, sprite = Game.assets.images.mushroom },
+		--{ col = "red", x = TILE_SIZE * 10, y = TILE_SIZE * 44, sprite = Game.assets.images.mushroom },
 	}
 	for _, value in pairs(walls.layers[3].objects) do
 		table.insert(Game.objects, {
@@ -352,10 +352,10 @@ function love.load()
 	Campfirepuzzle = {
 		solved = false,
 		-- Boundary: mushrooms reset if pushed outside this area
-		boundary = { x = TILE_SIZE * 42, y = TILE_SIZE * 47, w = TILE_SIZE * 14, h = TILE_SIZE * 10 },
+		boundary = { x = TILE_SIZE * 38, y = TILE_SIZE * 47, w = TILE_SIZE * 18, h = TILE_SIZE * 10 },
 		shrooms = {
 			{ x = 1376, y = 1504, origX = 1376, origY = 1504, col = "red", placed = false, sprite = Game.assets.images.mushroom },
-			{ x = 1376, y = 1632, origX = 1376, origY = 1632, col = "red", placed = false, sprite = Game.assets.images.mushroom },
+			{ x = 1300, y = 1564, origX = 1300, origY = 1564, col = "red", placed = false, sprite = Game.assets.images.mushroom },
 			{ x = 1472, y = 1632, origX = 1472, origY = 1632, col = "red", placed = false, sprite = Game.assets.images.mushroom },
 		},
 		shroomBlocked = {
@@ -582,7 +582,7 @@ function love.update(dt)
 				spread = 65,
 				offset = 32,
 			}
-			if math.random(800) == 1 then
+			if math.random(120) == 1 then
 				particles:spawnParticleEffect(tree.x - 32, tree.y - 64, 0, 0.3, type2)
 				particles:spawnParticleEffect(tree.x + 32, tree.y - 64, 0, 0.3, type2)
 			end

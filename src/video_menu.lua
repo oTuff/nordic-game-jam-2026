@@ -17,10 +17,10 @@ local resolutions = {
 local msaa_options = { 0, 2, 4, 8, 16 }
 
 local items = {
-	{ key = "resolution", label = "Resolution" },
-	{ key = "fullscreen", label = "Fullscreen" },
-	{ key = "vsync",      label = "VSync" },
-	{ key = "msaa",       label = "Anti-Aliasing" },
+	--{ key = "resolution", label = "Resolution" },
+	--{ key = "fullscreen", label = "Fullscreen" },
+	--{ key = "vsync",      label = "VSync" },
+	{ key = "msaa", label = "Anti-Aliasing" },
 }
 
 local function current_res_index()
