@@ -11,6 +11,7 @@ Particles = {
     ---@field y number
     ---@field xv number
     ---@field yv number
+    ---@field size number
     ---@field color number[]
 
     ---@class Effects
@@ -28,7 +29,7 @@ Particles = {
             count = { 18, 24 },
             lifetime = { 0.4, 0.8 },
             speed = { 0.1, 0.33 },
-            size = { 3, 10 },
+            size = { 4, 8 },
             color = { 1, 0.4, 0.1, 0.8 },
             spread = 180, -- in degrees range from -180 to 180
             offset = 32 / 2,
@@ -71,17 +72,19 @@ function Particles:spawnParticleEffect(_x, _y, _xv, _yv, type)
         end
         local offsetx = _x + (love.math.random() * (type.offset - (-type.offset)) + (-type.offset))
         local offsety = _y + (love.math.random() * (type.offset - (-type.offset)) + (-type.offset))
-        self:spawnParticle(offsetx, offsety, xv, yv, type)
+        local size = (love.math.random() * (type.size[2] - type.size[1]) + type.size[1])
+        self:spawnParticle(offsetx, offsety, xv, yv, size, type)
     end
 end
 
 --- dont use! its for internal usage. Instead use spawnParticleEffect
-function Particles:spawnParticle(x, y, xv, yv, type)
+function Particles:spawnParticle(x, y, xv, yv, size, type)
     --@type Particle (it doesnt like line below: p = {})
     local p = table.remove(self.ParticlePool)
     if not p then
         p = {}
     end
+    p.size = size
     p.x, p.y, p.xv, p.yv = x, y, xv, yv
     p.lifetime = math.random() * (type.lifetime[2] - type.lifetime[1]) + type.lifetime[1]
     p.color = type.color
@@ -110,8 +113,12 @@ end
 
 function Particles:draw()
     for _, p in ipairs(self.ParticleActive) do
-        love.graphics.setColor(p.color)
-        love.graphics.rectangle("fill", p.x, p.y, 5, 5)
+        local a = 1
+        if p.color[4] then
+            a = p.color[4]
+        end
+        love.graphics.setColor(p.color[1], p.color[2], p.color[3], a)
+        love.graphics.rectangle("fill", p.x, p.y, p.size, p.size)
     end
 end
 

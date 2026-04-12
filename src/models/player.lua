@@ -3,6 +3,7 @@ local physics = require("src.models.physics")
 ---@class Player: Object
 ---@field body Body
 ---@field interact boolean
+---@field intDelay number
 local Player = {}
 Player.__index = Player
 
@@ -43,8 +44,9 @@ end
 ---@return Player
 function Player.new(x, y)
 	local self = setmetatable({}, Player)
-	self.interact = false;
 	self.body = physics.Body.new(x, y)
+	self.interact = false
+	self.intDelay = 0.66
 
 	self.frameIndex = 1
 	self.frameTimer = 0
@@ -66,10 +68,12 @@ function Player:update(dt)
 		return false
 	end
 
-	if isDown(kb.interact, gp.interact) then
-		self.interact = true;
+	if isDown(kb.interact, gp.interact) and self.intDelay <= 0 then
+		self.interact = true
+		self.intDelay = 0.66
 	else
-		self.interact = false;
+		self.intDelay = self.intDelay - dt
+		self.interact = false
 	end
 
 	local moving = false

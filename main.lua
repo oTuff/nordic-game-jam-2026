@@ -26,6 +26,7 @@ local credits = require("src.screens.credits")
 
 ---@class Unlocks:Object
 ---@field color number[]
+---@field sprite love.Image
 function love.load()
 	--[[ Constants(not supposed to change): denoted with CAPITALIZED snake_case ]]
 	TILE_SIZE = 32
@@ -173,15 +174,15 @@ function love.load()
 	Game.player = player.new(100, 100)
 	--- @type Unlocks[]
 	Game.unlocks = {
-		{ col = "red",        x = TILE_SIZE * 10, y = TILE_SIZE * 44, color = { 1, 0, 0, 1 } }, -- red
-		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 } }, -- blue
-		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 } }, -- green
-		{ col = "yellow",     x = TILE_SIZE * 11, y = TILE_SIZE * 20, color = { 1, 1, 0, 1 } },
-		{ col = "pink",       x = TILE_SIZE * 67, y = TILE_SIZE * 32, color = { 1, 0.75, 0.80, 1 } },
-		{ col = "brown",      x = TILE_SIZE * 42, y = TILE_SIZE * 42, color = { 0.60, 0.30, 0.10, 1 } },
-		{ col = "darkgreen",  x = TILE_SIZE * 8,  y = TILE_SIZE * 72, color = { 0, 0.39, 0, 1 } },
-		{ col = "darkblue",   x = TILE_SIZE * 62, y = TILE_SIZE * 63, color = { 0, 0, 0.55, 1 } },
-		{ col = "white",      x = TILE_SIZE * 35, y = TILE_SIZE * 65, color = { 1, 1, 1, 1 } },
+		{ col = "red",        x = TILE_SIZE * 10, y = TILE_SIZE * 44, color = { 1, 0, 0, 1 },          sprite = Game.assets.images.diamond }, -- red
+		{ col = "blue",       x = TILE_SIZE * 43, y = TILE_SIZE * 20, color = { 0, 0, 1, 1 },          sprite = Game.assets.images.diamond }, -- blue
+		{ col = "lightgreen", x = TILE_SIZE * 69, y = TILE_SIZE * 5,  color = { 0, 1, 0, 1 },          sprite = Game.assets.images.diamond }, -- green
+		{ col = "yellow",     x = TILE_SIZE * 11, y = TILE_SIZE * 20, color = { 1, 1, 0, 1 },          sprite = Game.assets.images.diamond },
+		{ col = "pink",       x = TILE_SIZE * 67, y = TILE_SIZE * 32, color = { 1, 0.41, 0.71, 1 },    sprite = Game.assets.images.diamond },
+		{ col = "brown",      x = TILE_SIZE * 42, y = TILE_SIZE * 42, color = { 0.60, 0.30, 0.10, 1 }, sprite = Game.assets.images.diamond },
+		{ col = "darkgreen",  x = TILE_SIZE * 8,  y = TILE_SIZE * 72, color = { 0, 0.39, 0, 1 },       sprite = Game.assets.images.diamond },
+		{ col = "darkblue",   x = TILE_SIZE * 62, y = TILE_SIZE * 63, color = { 0, 0, 0.55, 1 },       sprite = Game.assets.images.diamond },
+		{ col = "white",      x = TILE_SIZE * 35, y = TILE_SIZE * 65, color = { 1, 1, 1, 1 },          sprite = Game.assets.images.diamond },
 	}
 	--- @type Entity[]
 	Game.objects = {
@@ -570,6 +571,22 @@ function love.update(dt)
 
 	-- tree collision
 	for _, tree in pairs(walls.layers[3].objects) do
+		if UnlockedColor.values["red"] then
+			---@type Effects
+			local type2 = {
+				count = { 0, 2 },
+				size = { 3, 6 },
+				lifetime = { 0.2, 1.53 },
+				speed = { 0.08, 0.28 },
+				color = { 0.72, 0.25, 0.05, 0.5 },
+				spread = 65,
+				offset = 32,
+			}
+			if math.random(800) == 1 then
+				particles:spawnParticleEffect(tree.x - 32, tree.y - 64, 0, 0.3, type2)
+				particles:spawnParticleEffect(tree.x + 32, tree.y - 64, 0, 0.3, type2)
+			end
+		end
 		if physics.CheckCollosionWall(p, tree) then
 			physics.HandleCollisionWall(p, tree)
 		end
@@ -614,10 +631,25 @@ function love.update(dt)
 	end
 
 	for index, obj in ipairs(Game.unlocks) do
+		if not UnlockedColor.values[obj.col] then
+			---@type Effects
+			local type2 = {
+				count = { 1, 3 },
+				size = { 0.34, 2.23 },
+				lifetime = { 0.009, 0.023 },
+				speed = { 0.4, 2.4 },
+				color = obj.color,
+				spread = 180,
+				offset = 16,
+			}
+			if math.random(10) == 1 then
+				particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, type2)
+			end
+		end
 		if physics.CheckCollosion(p, obj) then
 			local type = particles.Effects.explosion
 			type.color = obj.color -- TODO maybe randomize color a bit
-			particles:spawnParticleEffect(obj.x + 16, obj.y + 16, 0, 0, type)
+			particles:spawnParticleEffect(obj.x, obj.y, 0, 0, type)
 			table.remove(Game.unlocks, index)
 			UnlockedColor.values[obj.col] = true
 			if obj.col == "white" and not WhiteTransition.active then
@@ -733,7 +765,8 @@ function love.draw()
 
 		for _, obj in ipairs(Game.unlocks) do
 			love.graphics.setColor(obj.color[1], obj.color[2], obj.color[3], obj.color[4])
-			love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
+			love.graphics.draw(obj.sprite, obj.x, obj.y)
+			--love.graphics.rectangle("fill", obj.x, obj.y, TILE_SIZE, TILE_SIZE)
 		end
 
 		for _, obj in ipairs(Game.objects) do

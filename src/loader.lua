@@ -33,6 +33,7 @@ return {
 				water = love.graphics.newImage("assets/images/water.png"),
 				mushroom = love.graphics.newImage("assets/images/mushroom.png"),
 				campfire = loadSheet("assets/images/campfire_sheet.png", 32, 32),
+				diamond = love.graphics.newImage("assets/images/diamond.png"),
 			},
 			fonts = {
 			},
