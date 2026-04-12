@@ -122,7 +122,7 @@ function love.load()
 			lightgreen = false,
 			pink = false,
 			brown = false,
-			red = true,
+			red = false,
 			darkgreen = false,
 			darkblue = false,
 			white = false,
